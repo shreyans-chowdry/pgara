@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PGARA Compiler Studio</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23111827'/%3E%3Ctext x='16' y='22' font-family='Helvetica,Arial' font-size='16' font-weight='700' text-anchor='middle' fill='white'%3EP%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">P</div>
+      <div>
+        <div class="brand-name">PGARA</div>
+        <div class="brand-sub">Compiler Studio</div>
+      </div>
+    </div>
+    <div class="controls">
+      <label class="field">
+        <span>Program</span>
+        <select id="example"></select>
+      </label>
+      <label class="field narrow">
+        <span>Registers k</span>
+        <input id="k" type="number" min="2" max="16" value="4">
+      </label>
+      <label class="field">
+        <span>Optimisation</span>
+        <select id="opt">
+          <option value="2" selected>-O2 full</option>
+          <option value="0">-O0 none</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>Training input</span>
+        <input id="train" type="text" placeholder="e.g. 7 10">
+      </label>
+      <label class="field">
+        <span>Test input</span>
+        <input id="test" type="text" placeholder="defaults to training">
+      </label>
+      <label class="field toggle">
+        <input id="live" type="checkbox" checked>
+        <span>Live compile</span>
+      </label>
+      <button id="compile" class="btn primary">Compile</button>
+      <div id="status" class="status idle">Ready</div>
+    </div>
+  </header>
+
+  <main class="split">
+    <section class="pane editor-pane">
+      <div class="pane-head">
+        <div class="pane-title">Source <span class="muted">MiniC</span></div>
+        <div class="pane-meta" id="cursor-pos">Ln 1, Col 1</div>
+      </div>
+      <div class="editor" id="editor">
+        <div class="gutter" id="gutter"></div>
+        <div class="code-wrap" id="code-wrap">
+          <div class="line-mark" id="line-mark"></div>
+          <pre class="highlight" id="highlight" aria-hidden="true"></pre>
+          <textarea id="source" spellcheck="false" autocapitalize="off" autocomplete="off" wrap="off"></textarea>
+        </div>
+      </div>
+      <div class="diagnostics" id="diagnostics"></div>
+    </section>
+
+    <section class="pane views">
+      <nav class="tabs" id="tabs">
+        <button data-tab="tokens" class="active">Tokens</button>
+        <button data-tab="ast">AST</button>
+        <button data-tab="symbols">Symbols</button>
+        <button data-tab="tac">TAC</button>
+        <button data-tab="ssa">SSA &amp; Optimiser</button>
+        <button data-tab="cfg">CFG</button>
+        <button data-tab="alloc">Allocation</button>
+        <button data-tab="asm">Target Code</button>
+        <button data-tab="run">Run &amp; Metrics</button>
+        <button data-tab="grammar">Grammar</button>
+      </nav>
+      <div class="view-wrap">
+        <div class="view active" id="view-tokens"></div>
+        <div class="view" id="view-ast"></div>
+        <div class="view" id="view-symbols"></div>
+        <div class="view" id="view-tac"></div>
+        <div class="view" id="view-ssa"></div>
+        <div class="view" id="view-cfg"></div>
+        <div class="view" id="view-alloc"></div>
+        <div class="view" id="view-asm"></div>
+        <div class="view" id="view-run"></div>
+        <div class="view" id="view-grammar"></div>
+      </div>
+    </section>
+  </main>
+  <div class="tooltip" id="tooltip"></div>
+  <script src="app.js"></script>
+</body>
+</html>
