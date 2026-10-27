@@ -1,0 +1,1405 @@
+{
+ "rows": [
+  {
+   "train_error_permille": 10,
+   "k": 4,
+   "allocator": "pgara",
+   "cycles": 338389,
+   "spill_memops": 28835,
+   "code_size": 146,
+   "utilization": 0.7868037944266586,
+   "correct": true
+  },
+  {
+   "train_error_permille": 10,
+   "k": 4,
+   "allocator": "static",
+   "cycles": 358163,
+   "spill_memops": 36772,
+   "code_size": 138,
+   "utilization": 0.7697187552839062,
+   "correct": true
+  },
+  {
+   "train_error_permille": 10,
+   "k": 4,
+   "allocator": "loopdepth",
+   "cycles": 414979,
+   "spill_memops": 52980,
+   "code_size": 143,
+   "utilization": 0.7458785608418912,
+   "correct": true
+  },
+  {
+   "train_error_permille": 10,
+   "k": 4,
+   "allocator": "linearscan",
+   "cycles": 516434,
+   "spill_memops": 82911,
+   "code_size": 166,
+   "utilization": 0.5570449360765479,
+   "correct": true
+  },
+  {
+   "train_error_permille": 10,
+   "k": 4,
+   "allocator": "freqprio",
+   "cycles": 383195,
+   "spill_memops": 45119,
+   "code_size": 149,
+   "utilization": 0.7311448644074867,
+   "correct": true
+  },
+  {
+   "train_error_permille": 10,
+   "k": 4,
+   "allocator": "briggs",
+   "cycles": 424783,
+   "spill_memops": 57304,
+   "code_size": 148,
+   "utilization": 0.7280394101762162,
+   "correct": true
+  },
+  {
+   "train_error_permille": 10,
+   "k": 4,
+   "allocator": "briggsprof",
+   "cycles": 351707,
+   "spill_memops": 32931,
+   "code_size": 139,
+   "utilization": 0.8148976712552064,
+   "correct": true
+  },
+  {
+   "train_error_permille": 10,
+   "k": 8,
+   "allocator": "pgara",
+   "cycles": 256959,
+   "spill_memops": 302,
+   "code_size": 128,
+   "utilization": 0.9980104746533153,
+   "correct": true
+  },
+  {
+   "train_error_permille": 10,
+   "k": 8,
+   "allocator": "static",
+   "cycles": 296855,
+   "spill_memops": 16334,
+   "code_size": 123,
+   "utilization": 0.8860336442859834,
+   "correct": true
+  },
+  {
+   "train_error_permille": 10,
+   "k": 8,
+   "allocator": "loopdepth",
+   "cycles": 345767,
+   "spill_memops": 32630,
+   "code_size": 132,
+   "utilization": 0.7958596355127908,
+   "correct": true
+  },
+  {
+   "train_error_permille": 10,
+   "k": 8,
+   "allocator": "linearscan",
+   "cycles": 441280,
+   "spill_memops": 61199,
+   "code_size": 152,
+   "utilization": 0.7407360336201382,
+   "correct": true
+  },
+  {
+   "train_error_permille": 10,
+   "k": 8,
+   "allocator": "freqprio",
+   "cycles": 305715,
+   "spill_memops": 16510,
+   "code_size": 133,
+   "utilization": 0.9104386930884275,
+   "correct": true
+  },
+  {
+   "train_error_permille": 10,
+   "k": 8,
+   "allocator": "briggs",
+   "cycles": 309558,
+   "spill_memops": 20554,
+   "code_size": 127,
+   "utilization": 0.8713582054989141,
+   "correct": true
+  },
+  {
+   "train_error_permille": 10,
+   "k": 8,
+   "allocator": "briggsprof",
+   "cycles": 297734,
+   "spill_memops": 16598,
+   "code_size": 129,
+   "utilization": 0.9012452922242121,
+   "correct": true
+  },
+  {
+   "train_error_permille": 20,
+   "k": 4,
+   "allocator": "pgara",
+   "cycles": 338389,
+   "spill_memops": 28835,
+   "code_size": 146,
+   "utilization": 0.7868037944266586,
+   "correct": true
+  },
+  {
+   "train_error_permille": 20,
+   "k": 4,
+   "allocator": "static",
+   "cycles": 358163,
+   "spill_memops": 36772,
+   "code_size": 138,
+   "utilization": 0.7697187552839062,
+   "correct": true
+  },
+  {
+   "train_error_permille": 20,
+   "k": 4,
+   "allocator": "loopdepth",
+   "cycles": 414979,
+   "spill_memops": 52980,
+   "code_size": 143,
+   "utilization": 0.7458785608418912,
+   "correct": true
+  },
+  {
+   "train_error_permille": 20,
+   "k": 4,
+   "allocator": "linearscan",
+   "cycles": 516434,
+   "spill_memops": 82911,
+   "code_size": 166,
+   "utilization": 0.5570449360765479,
+   "correct": true
+  },
+  {
+   "train_error_permille": 20,
+   "k": 4,
+   "allocator": "freqprio",
+   "cycles": 383195,
+   "spill_memops": 45119,
+   "code_size": 149,
+   "utilization": 0.7311448644074867,
+   "correct": true
+  },
+  {
+   "train_error_permille": 20,
+   "k": 4,
+   "allocator": "briggs",
+   "cycles": 424783,
+   "spill_memops": 57304,
+   "code_size": 148,
+   "utilization": 0.7280394101762162,
+   "correct": true
+  },
+  {
+   "train_error_permille": 20,
+   "k": 4,
+   "allocator": "briggsprof",
+   "cycles": 351707,
+   "spill_memops": 32931,
+   "code_size": 139,
+   "utilization": 0.8148976712552064,
+   "correct": true
+  },
+  {
+   "train_error_permille": 20,
+   "k": 8,
+   "allocator": "pgara",
+   "cycles": 256959,
+   "spill_memops": 302,
+   "code_size": 128,
+   "utilization": 0.9980104746533153,
+   "correct": true
+  },
+  {
+   "train_error_permille": 20,
+   "k": 8,
+   "allocator": "static",
+   "cycles": 296855,
+   "spill_memops": 16334,
+   "code_size": 123,
+   "utilization": 0.8860336442859834,
+   "correct": true
+  },
+  {
+   "train_error_permille": 20,
+   "k": 8,
+   "allocator": "loopdepth",
+   "cycles": 345767,
+   "spill_memops": 32630,
+   "code_size": 132,
+   "utilization": 0.7958596355127908,
+   "correct": true
+  },
+  {
+   "train_error_permille": 20,
+   "k": 8,
+   "allocator": "linearscan",
+   "cycles": 441280,
+   "spill_memops": 61199,
+   "code_size": 152,
+   "utilization": 0.7407360336201382,
+   "correct": true
+  },
+  {
+   "train_error_permille": 20,
+   "k": 8,
+   "allocator": "freqprio",
+   "cycles": 305715,
+   "spill_memops": 16510,
+   "code_size": 133,
+   "utilization": 0.9104386930884275,
+   "correct": true
+  },
+  {
+   "train_error_permille": 20,
+   "k": 8,
+   "allocator": "briggs",
+   "cycles": 309558,
+   "spill_memops": 20554,
+   "code_size": 127,
+   "utilization": 0.8713582054989141,
+   "correct": true
+  },
+  {
+   "train_error_permille": 20,
+   "k": 8,
+   "allocator": "briggsprof",
+   "cycles": 297734,
+   "spill_memops": 16598,
+   "code_size": 129,
+   "utilization": 0.9012452922242121,
+   "correct": true
+  },
+  {
+   "train_error_permille": 50,
+   "k": 4,
+   "allocator": "pgara",
+   "cycles": 338389,
+   "spill_memops": 28835,
+   "code_size": 146,
+   "utilization": 0.7868037944266586,
+   "correct": true
+  },
+  {
+   "train_error_permille": 50,
+   "k": 4,
+   "allocator": "static",
+   "cycles": 358163,
+   "spill_memops": 36772,
+   "code_size": 138,
+   "utilization": 0.7697187552839062,
+   "correct": true
+  },
+  {
+   "train_error_permille": 50,
+   "k": 4,
+   "allocator": "loopdepth",
+   "cycles": 414979,
+   "spill_memops": 52980,
+   "code_size": 143,
+   "utilization": 0.7458785608418912,
+   "correct": true
+  },
+  {
+   "train_error_permille": 50,
+   "k": 4,
+   "allocator": "linearscan",
+   "cycles": 516434,
+   "spill_memops": 82911,
+   "code_size": 166,
+   "utilization": 0.5570449360765479,
+   "correct": true
+  },
+  {
+   "train_error_permille": 50,
+   "k": 4,
+   "allocator": "freqprio",
+   "cycles": 383195,
+   "spill_memops": 45119,
+   "code_size": 149,
+   "utilization": 0.7311448644074867,
+   "correct": true
+  },
+  {
+   "train_error_permille": 50,
+   "k": 4,
+   "allocator": "briggs",
+   "cycles": 424783,
+   "spill_memops": 57304,
+   "code_size": 148,
+   "utilization": 0.7280394101762162,
+   "correct": true
+  },
+  {
+   "train_error_permille": 50,
+   "k": 4,
+   "allocator": "briggsprof",
+   "cycles": 351707,
+   "spill_memops": 32931,
+   "code_size": 139,
+   "utilization": 0.8148976712552064,
+   "correct": true
+  },
+  {
+   "train_error_permille": 50,
+   "k": 8,
+   "allocator": "pgara",
+   "cycles": 256959,
+   "spill_memops": 302,
+   "code_size": 128,
+   "utilization": 0.9980104746533153,
+   "correct": true
+  },
+  {
+   "train_error_permille": 50,
+   "k": 8,
+   "allocator": "static",
+   "cycles": 296855,
+   "spill_memops": 16334,
+   "code_size": 123,
+   "utilization": 0.8860336442859834,
+   "correct": true
+  },
+  {
+   "train_error_permille": 50,
+   "k": 8,
+   "allocator": "loopdepth",
+   "cycles": 345767,
+   "spill_memops": 32630,
+   "code_size": 132,
+   "utilization": 0.7958596355127908,
+   "correct": true
+  },
+  {
+   "train_error_permille": 50,
+   "k": 8,
+   "allocator": "linearscan",
+   "cycles": 441280,
+   "spill_memops": 61199,
+   "code_size": 152,
+   "utilization": 0.7407360336201382,
+   "correct": true
+  },
+  {
+   "train_error_permille": 50,
+   "k": 8,
+   "allocator": "freqprio",
+   "cycles": 305715,
+   "spill_memops": 16510,
+   "code_size": 133,
+   "utilization": 0.9104386930884275,
+   "correct": true
+  },
+  {
+   "train_error_permille": 50,
+   "k": 8,
+   "allocator": "briggs",
+   "cycles": 309558,
+   "spill_memops": 20554,
+   "code_size": 127,
+   "utilization": 0.8713582054989141,
+   "correct": true
+  },
+  {
+   "train_error_permille": 50,
+   "k": 8,
+   "allocator": "briggsprof",
+   "cycles": 297734,
+   "spill_memops": 16598,
+   "code_size": 129,
+   "utilization": 0.9012452922242121,
+   "correct": true
+  },
+  {
+   "train_error_permille": 100,
+   "k": 4,
+   "allocator": "pgara",
+   "cycles": 338389,
+   "spill_memops": 28835,
+   "code_size": 146,
+   "utilization": 0.7868037944266586,
+   "correct": true
+  },
+  {
+   "train_error_permille": 100,
+   "k": 4,
+   "allocator": "static",
+   "cycles": 358163,
+   "spill_memops": 36772,
+   "code_size": 138,
+   "utilization": 0.7697187552839062,
+   "correct": true
+  },
+  {
+   "train_error_permille": 100,
+   "k": 4,
+   "allocator": "loopdepth",
+   "cycles": 414979,
+   "spill_memops": 52980,
+   "code_size": 143,
+   "utilization": 0.7458785608418912,
+   "correct": true
+  },
+  {
+   "train_error_permille": 100,
+   "k": 4,
+   "allocator": "linearscan",
+   "cycles": 516434,
+   "spill_memops": 82911,
+   "code_size": 166,
+   "utilization": 0.5570449360765479,
+   "correct": true
+  },
+  {
+   "train_error_permille": 100,
+   "k": 4,
+   "allocator": "freqprio",
+   "cycles": 383195,
+   "spill_memops": 45119,
+   "code_size": 149,
+   "utilization": 0.7311448644074867,
+   "correct": true
+  },
+  {
+   "train_error_permille": 100,
+   "k": 4,
+   "allocator": "briggs",
+   "cycles": 424783,
+   "spill_memops": 57304,
+   "code_size": 148,
+   "utilization": 0.7280394101762162,
+   "correct": true
+  },
+  {
+   "train_error_permille": 100,
+   "k": 4,
+   "allocator": "briggsprof",
+   "cycles": 351707,
+   "spill_memops": 32931,
+   "code_size": 139,
+   "utilization": 0.8148976712552064,
+   "correct": true
+  },
+  {
+   "train_error_permille": 100,
+   "k": 8,
+   "allocator": "pgara",
+   "cycles": 256959,
+   "spill_memops": 302,
+   "code_size": 128,
+   "utilization": 0.9980104746533153,
+   "correct": true
+  },
+  {
+   "train_error_permille": 100,
+   "k": 8,
+   "allocator": "static",
+   "cycles": 296855,
+   "spill_memops": 16334,
+   "code_size": 123,
+   "utilization": 0.8860336442859834,
+   "correct": true
+  },
+  {
+   "train_error_permille": 100,
+   "k": 8,
+   "allocator": "loopdepth",
+   "cycles": 345767,
+   "spill_memops": 32630,
+   "code_size": 132,
+   "utilization": 0.7958596355127908,
+   "correct": true
+  },
+  {
+   "train_error_permille": 100,
+   "k": 8,
+   "allocator": "linearscan",
+   "cycles": 441280,
+   "spill_memops": 61199,
+   "code_size": 152,
+   "utilization": 0.7407360336201382,
+   "correct": true
+  },
+  {
+   "train_error_permille": 100,
+   "k": 8,
+   "allocator": "freqprio",
+   "cycles": 305715,
+   "spill_memops": 16510,
+   "code_size": 133,
+   "utilization": 0.9104386930884275,
+   "correct": true
+  },
+  {
+   "train_error_permille": 100,
+   "k": 8,
+   "allocator": "briggs",
+   "cycles": 309558,
+   "spill_memops": 20554,
+   "code_size": 127,
+   "utilization": 0.8713582054989141,
+   "correct": true
+  },
+  {
+   "train_error_permille": 100,
+   "k": 8,
+   "allocator": "briggsprof",
+   "cycles": 297734,
+   "spill_memops": 16598,
+   "code_size": 129,
+   "utilization": 0.9012452922242121,
+   "correct": true
+  },
+  {
+   "train_error_permille": 150,
+   "k": 4,
+   "allocator": "pgara",
+   "cycles": 338389,
+   "spill_memops": 28835,
+   "code_size": 146,
+   "utilization": 0.7868037944266586,
+   "correct": true
+  },
+  {
+   "train_error_permille": 150,
+   "k": 4,
+   "allocator": "static",
+   "cycles": 358163,
+   "spill_memops": 36772,
+   "code_size": 138,
+   "utilization": 0.7697187552839062,
+   "correct": true
+  },
+  {
+   "train_error_permille": 150,
+   "k": 4,
+   "allocator": "loopdepth",
+   "cycles": 414979,
+   "spill_memops": 52980,
+   "code_size": 143,
+   "utilization": 0.7458785608418912,
+   "correct": true
+  },
+  {
+   "train_error_permille": 150,
+   "k": 4,
+   "allocator": "linearscan",
+   "cycles": 516434,
+   "spill_memops": 82911,
+   "code_size": 166,
+   "utilization": 0.5570449360765479,
+   "correct": true
+  },
+  {
+   "train_error_permille": 150,
+   "k": 4,
+   "allocator": "freqprio",
+   "cycles": 383195,
+   "spill_memops": 45119,
+   "code_size": 149,
+   "utilization": 0.7311448644074867,
+   "correct": true
+  },
+  {
+   "train_error_permille": 150,
+   "k": 4,
+   "allocator": "briggs",
+   "cycles": 424783,
+   "spill_memops": 57304,
+   "code_size": 148,
+   "utilization": 0.7280394101762162,
+   "correct": true
+  },
+  {
+   "train_error_permille": 150,
+   "k": 4,
+   "allocator": "briggsprof",
+   "cycles": 351707,
+   "spill_memops": 32931,
+   "code_size": 139,
+   "utilization": 0.8148976712552064,
+   "correct": true
+  },
+  {
+   "train_error_permille": 150,
+   "k": 8,
+   "allocator": "pgara",
+   "cycles": 256959,
+   "spill_memops": 302,
+   "code_size": 128,
+   "utilization": 0.9980104746533153,
+   "correct": true
+  },
+  {
+   "train_error_permille": 150,
+   "k": 8,
+   "allocator": "static",
+   "cycles": 296855,
+   "spill_memops": 16334,
+   "code_size": 123,
+   "utilization": 0.8860336442859834,
+   "correct": true
+  },
+  {
+   "train_error_permille": 150,
+   "k": 8,
+   "allocator": "loopdepth",
+   "cycles": 345767,
+   "spill_memops": 32630,
+   "code_size": 132,
+   "utilization": 0.7958596355127908,
+   "correct": true
+  },
+  {
+   "train_error_permille": 150,
+   "k": 8,
+   "allocator": "linearscan",
+   "cycles": 441280,
+   "spill_memops": 61199,
+   "code_size": 152,
+   "utilization": 0.7407360336201382,
+   "correct": true
+  },
+  {
+   "train_error_permille": 150,
+   "k": 8,
+   "allocator": "freqprio",
+   "cycles": 305715,
+   "spill_memops": 16510,
+   "code_size": 133,
+   "utilization": 0.9104386930884275,
+   "correct": true
+  },
+  {
+   "train_error_permille": 150,
+   "k": 8,
+   "allocator": "briggs",
+   "cycles": 309558,
+   "spill_memops": 20554,
+   "code_size": 127,
+   "utilization": 0.8713582054989141,
+   "correct": true
+  },
+  {
+   "train_error_permille": 150,
+   "k": 8,
+   "allocator": "briggsprof",
+   "cycles": 297734,
+   "spill_memops": 16598,
+   "code_size": 129,
+   "utilization": 0.9012452922242121,
+   "correct": true
+  },
+  {
+   "train_error_permille": 200,
+   "k": 4,
+   "allocator": "pgara",
+   "cycles": 338389,
+   "spill_memops": 28835,
+   "code_size": 146,
+   "utilization": 0.7868037944266586,
+   "correct": true
+  },
+  {
+   "train_error_permille": 200,
+   "k": 4,
+   "allocator": "static",
+   "cycles": 358163,
+   "spill_memops": 36772,
+   "code_size": 138,
+   "utilization": 0.7697187552839062,
+   "correct": true
+  },
+  {
+   "train_error_permille": 200,
+   "k": 4,
+   "allocator": "loopdepth",
+   "cycles": 414979,
+   "spill_memops": 52980,
+   "code_size": 143,
+   "utilization": 0.7458785608418912,
+   "correct": true
+  },
+  {
+   "train_error_permille": 200,
+   "k": 4,
+   "allocator": "linearscan",
+   "cycles": 516434,
+   "spill_memops": 82911,
+   "code_size": 166,
+   "utilization": 0.5570449360765479,
+   "correct": true
+  },
+  {
+   "train_error_permille": 200,
+   "k": 4,
+   "allocator": "freqprio",
+   "cycles": 383195,
+   "spill_memops": 45119,
+   "code_size": 149,
+   "utilization": 0.7311448644074867,
+   "correct": true
+  },
+  {
+   "train_error_permille": 200,
+   "k": 4,
+   "allocator": "briggs",
+   "cycles": 424783,
+   "spill_memops": 57304,
+   "code_size": 148,
+   "utilization": 0.7280394101762162,
+   "correct": true
+  },
+  {
+   "train_error_permille": 200,
+   "k": 4,
+   "allocator": "briggsprof",
+   "cycles": 351707,
+   "spill_memops": 32931,
+   "code_size": 139,
+   "utilization": 0.8148976712552064,
+   "correct": true
+  },
+  {
+   "train_error_permille": 200,
+   "k": 8,
+   "allocator": "pgara",
+   "cycles": 256959,
+   "spill_memops": 302,
+   "code_size": 128,
+   "utilization": 0.9980104746533153,
+   "correct": true
+  },
+  {
+   "train_error_permille": 200,
+   "k": 8,
+   "allocator": "static",
+   "cycles": 296855,
+   "spill_memops": 16334,
+   "code_size": 123,
+   "utilization": 0.8860336442859834,
+   "correct": true
+  },
+  {
+   "train_error_permille": 200,
+   "k": 8,
+   "allocator": "loopdepth",
+   "cycles": 345767,
+   "spill_memops": 32630,
+   "code_size": 132,
+   "utilization": 0.7958596355127908,
+   "correct": true
+  },
+  {
+   "train_error_permille": 200,
+   "k": 8,
+   "allocator": "linearscan",
+   "cycles": 441280,
+   "spill_memops": 61199,
+   "code_size": 152,
+   "utilization": 0.7407360336201382,
+   "correct": true
+  },
+  {
+   "train_error_permille": 200,
+   "k": 8,
+   "allocator": "freqprio",
+   "cycles": 305715,
+   "spill_memops": 16510,
+   "code_size": 133,
+   "utilization": 0.9104386930884275,
+   "correct": true
+  },
+  {
+   "train_error_permille": 200,
+   "k": 8,
+   "allocator": "briggs",
+   "cycles": 309558,
+   "spill_memops": 20554,
+   "code_size": 127,
+   "utilization": 0.8713582054989141,
+   "correct": true
+  },
+  {
+   "train_error_permille": 200,
+   "k": 8,
+   "allocator": "briggsprof",
+   "cycles": 297734,
+   "spill_memops": 16598,
+   "code_size": 129,
+   "utilization": 0.9012452922242121,
+   "correct": true
+  },
+  {
+   "train_error_permille": 300,
+   "k": 4,
+   "allocator": "pgara",
+   "cycles": 358643,
+   "spill_memops": 36933,
+   "code_size": 147,
+   "utilization": 0.7269299302777799,
+   "correct": true
+  },
+  {
+   "train_error_permille": 300,
+   "k": 4,
+   "allocator": "static",
+   "cycles": 358163,
+   "spill_memops": 36772,
+   "code_size": 138,
+   "utilization": 0.7697187552839062,
+   "correct": true
+  },
+  {
+   "train_error_permille": 300,
+   "k": 4,
+   "allocator": "loopdepth",
+   "cycles": 414979,
+   "spill_memops": 52980,
+   "code_size": 143,
+   "utilization": 0.7458785608418912,
+   "correct": true
+  },
+  {
+   "train_error_permille": 300,
+   "k": 4,
+   "allocator": "linearscan",
+   "cycles": 516434,
+   "spill_memops": 82911,
+   "code_size": 166,
+   "utilization": 0.5570449360765479,
+   "correct": true
+  },
+  {
+   "train_error_permille": 300,
+   "k": 4,
+   "allocator": "freqprio",
+   "cycles": 346991,
+   "spill_memops": 33049,
+   "code_size": 145,
+   "utilization": 0.7934269659409827,
+   "correct": true
+  },
+  {
+   "train_error_permille": 300,
+   "k": 4,
+   "allocator": "briggs",
+   "cycles": 424783,
+   "spill_memops": 57304,
+   "code_size": 148,
+   "utilization": 0.7280394101762162,
+   "correct": true
+  },
+  {
+   "train_error_permille": 300,
+   "k": 4,
+   "allocator": "briggsprof",
+   "cycles": 351707,
+   "spill_memops": 32931,
+   "code_size": 139,
+   "utilization": 0.8148976712552064,
+   "correct": true
+  },
+  {
+   "train_error_permille": 300,
+   "k": 8,
+   "allocator": "pgara",
+   "cycles": 256959,
+   "spill_memops": 302,
+   "code_size": 128,
+   "utilization": 0.9980104746533153,
+   "correct": true
+  },
+  {
+   "train_error_permille": 300,
+   "k": 8,
+   "allocator": "static",
+   "cycles": 296855,
+   "spill_memops": 16334,
+   "code_size": 123,
+   "utilization": 0.8860336442859834,
+   "correct": true
+  },
+  {
+   "train_error_permille": 300,
+   "k": 8,
+   "allocator": "loopdepth",
+   "cycles": 345767,
+   "spill_memops": 32630,
+   "code_size": 132,
+   "utilization": 0.7958596355127908,
+   "correct": true
+  },
+  {
+   "train_error_permille": 300,
+   "k": 8,
+   "allocator": "linearscan",
+   "cycles": 441280,
+   "spill_memops": 61199,
+   "code_size": 152,
+   "utilization": 0.7407360336201382,
+   "correct": true
+  },
+  {
+   "train_error_permille": 300,
+   "k": 8,
+   "allocator": "freqprio",
+   "cycles": 305715,
+   "spill_memops": 16510,
+   "code_size": 133,
+   "utilization": 0.9104386930884275,
+   "correct": true
+  },
+  {
+   "train_error_permille": 300,
+   "k": 8,
+   "allocator": "briggs",
+   "cycles": 309558,
+   "spill_memops": 20554,
+   "code_size": 127,
+   "utilization": 0.8713582054989141,
+   "correct": true
+  },
+  {
+   "train_error_permille": 300,
+   "k": 8,
+   "allocator": "briggsprof",
+   "cycles": 297734,
+   "spill_memops": 16598,
+   "code_size": 129,
+   "utilization": 0.9012452922242121,
+   "correct": true
+  },
+  {
+   "train_error_permille": 400,
+   "k": 4,
+   "allocator": "pgara",
+   "cycles": 382523,
+   "spill_memops": 44890,
+   "code_size": 145,
+   "utilization": 0.6682751638671918,
+   "correct": true
+  },
+  {
+   "train_error_permille": 400,
+   "k": 4,
+   "allocator": "static",
+   "cycles": 358163,
+   "spill_memops": 36772,
+   "code_size": 138,
+   "utilization": 0.7697187552839062,
+   "correct": true
+  },
+  {
+   "train_error_permille": 400,
+   "k": 4,
+   "allocator": "loopdepth",
+   "cycles": 414979,
+   "spill_memops": 52980,
+   "code_size": 143,
+   "utilization": 0.7458785608418912,
+   "correct": true
+  },
+  {
+   "train_error_permille": 400,
+   "k": 4,
+   "allocator": "linearscan",
+   "cycles": 516434,
+   "spill_memops": 82911,
+   "code_size": 166,
+   "utilization": 0.5570449360765479,
+   "correct": true
+  },
+  {
+   "train_error_permille": 400,
+   "k": 4,
+   "allocator": "freqprio",
+   "cycles": 383003,
+   "spill_memops": 45052,
+   "code_size": 142,
+   "utilization": 0.7443756631469052,
+   "correct": true
+  },
+  {
+   "train_error_permille": 400,
+   "k": 4,
+   "allocator": "briggs",
+   "cycles": 424783,
+   "spill_memops": 57304,
+   "code_size": 148,
+   "utilization": 0.7280394101762162,
+   "correct": true
+  },
+  {
+   "train_error_permille": 400,
+   "k": 4,
+   "allocator": "briggsprof",
+   "cycles": 424783,
+   "spill_memops": 57304,
+   "code_size": 148,
+   "utilization": 0.7279257806750579,
+   "correct": true
+  },
+  {
+   "train_error_permille": 400,
+   "k": 8,
+   "allocator": "pgara",
+   "cycles": 256959,
+   "spill_memops": 302,
+   "code_size": 128,
+   "utilization": 0.9980104746533153,
+   "correct": true
+  },
+  {
+   "train_error_permille": 400,
+   "k": 8,
+   "allocator": "static",
+   "cycles": 296855,
+   "spill_memops": 16334,
+   "code_size": 123,
+   "utilization": 0.8860336442859834,
+   "correct": true
+  },
+  {
+   "train_error_permille": 400,
+   "k": 8,
+   "allocator": "loopdepth",
+   "cycles": 345767,
+   "spill_memops": 32630,
+   "code_size": 132,
+   "utilization": 0.7958596355127908,
+   "correct": true
+  },
+  {
+   "train_error_permille": 400,
+   "k": 8,
+   "allocator": "linearscan",
+   "cycles": 441280,
+   "spill_memops": 61199,
+   "code_size": 152,
+   "utilization": 0.7407360336201382,
+   "correct": true
+  },
+  {
+   "train_error_permille": 400,
+   "k": 8,
+   "allocator": "freqprio",
+   "cycles": 305715,
+   "spill_memops": 16510,
+   "code_size": 133,
+   "utilization": 0.9104386930884275,
+   "correct": true
+  },
+  {
+   "train_error_permille": 400,
+   "k": 8,
+   "allocator": "briggs",
+   "cycles": 309558,
+   "spill_memops": 20554,
+   "code_size": 127,
+   "utilization": 0.8713582054989141,
+   "correct": true
+  },
+  {
+   "train_error_permille": 400,
+   "k": 8,
+   "allocator": "briggsprof",
+   "cycles": 297734,
+   "spill_memops": 16598,
+   "code_size": 129,
+   "utilization": 0.9012452922242121,
+   "correct": true
+  },
+  {
+   "train_error_permille": 500,
+   "k": 4,
+   "allocator": "pgara",
+   "cycles": 418655,
+   "spill_memops": 56936,
+   "code_size": 140,
+   "utilization": 0.6239042982554645,
+   "correct": true
+  },
+  {
+   "train_error_permille": 500,
+   "k": 4,
+   "allocator": "static",
+   "cycles": 358163,
+   "spill_memops": 36772,
+   "code_size": 138,
+   "utilization": 0.7697187552839062,
+   "correct": true
+  },
+  {
+   "train_error_permille": 500,
+   "k": 4,
+   "allocator": "loopdepth",
+   "cycles": 414979,
+   "spill_memops": 52980,
+   "code_size": 143,
+   "utilization": 0.7458785608418912,
+   "correct": true
+  },
+  {
+   "train_error_permille": 500,
+   "k": 4,
+   "allocator": "linearscan",
+   "cycles": 516434,
+   "spill_memops": 82911,
+   "code_size": 166,
+   "utilization": 0.5570449360765479,
+   "correct": true
+  },
+  {
+   "train_error_permille": 500,
+   "k": 4,
+   "allocator": "freqprio",
+   "cycles": 406787,
+   "spill_memops": 52980,
+   "code_size": 140,
+   "utilization": 0.72420470694798,
+   "correct": true
+  },
+  {
+   "train_error_permille": 500,
+   "k": 4,
+   "allocator": "briggs",
+   "cycles": 424783,
+   "spill_memops": 57304,
+   "code_size": 148,
+   "utilization": 0.7280394101762162,
+   "correct": true
+  },
+  {
+   "train_error_permille": 500,
+   "k": 4,
+   "allocator": "briggsprof",
+   "cycles": 424783,
+   "spill_memops": 57304,
+   "code_size": 148,
+   "utilization": 0.7280394101762162,
+   "correct": true
+  },
+  {
+   "train_error_permille": 500,
+   "k": 8,
+   "allocator": "pgara",
+   "cycles": 357379,
+   "spill_memops": 36498,
+   "code_size": 132,
+   "utilization": 0.7299984464812801,
+   "correct": true
+  },
+  {
+   "train_error_permille": 500,
+   "k": 8,
+   "allocator": "static",
+   "cycles": 296855,
+   "spill_memops": 16334,
+   "code_size": 123,
+   "utilization": 0.8860336442859834,
+   "correct": true
+  },
+  {
+   "train_error_permille": 500,
+   "k": 8,
+   "allocator": "loopdepth",
+   "cycles": 345767,
+   "spill_memops": 32630,
+   "code_size": 132,
+   "utilization": 0.7958596355127908,
+   "correct": true
+  },
+  {
+   "train_error_permille": 500,
+   "k": 8,
+   "allocator": "linearscan",
+   "cycles": 441280,
+   "spill_memops": 61199,
+   "code_size": 152,
+   "utilization": 0.7407360336201382,
+   "correct": true
+  },
+  {
+   "train_error_permille": 500,
+   "k": 8,
+   "allocator": "freqprio",
+   "cycles": 345767,
+   "spill_memops": 32630,
+   "code_size": 132,
+   "utilization": 0.7958596355127908,
+   "correct": true
+  },
+  {
+   "train_error_permille": 500,
+   "k": 8,
+   "allocator": "briggs",
+   "cycles": 309558,
+   "spill_memops": 20554,
+   "code_size": 127,
+   "utilization": 0.8713582054989141,
+   "correct": true
+  },
+  {
+   "train_error_permille": 500,
+   "k": 8,
+   "allocator": "briggsprof",
+   "cycles": 402923,
+   "spill_memops": 40808,
+   "code_size": 140,
+   "utilization": 0.8364703760844737,
+   "correct": true
+  },
+  {
+   "train_error_permille": 600,
+   "k": 4,
+   "allocator": "pgara",
+   "cycles": 418655,
+   "spill_memops": 56936,
+   "code_size": 140,
+   "utilization": 0.6239042982554645,
+   "correct": true
+  },
+  {
+   "train_error_permille": 600,
+   "k": 4,
+   "allocator": "static",
+   "cycles": 358163,
+   "spill_memops": 36772,
+   "code_size": 138,
+   "utilization": 0.7697187552839062,
+   "correct": true
+  },
+  {
+   "train_error_permille": 600,
+   "k": 4,
+   "allocator": "loopdepth",
+   "cycles": 414979,
+   "spill_memops": 52980,
+   "code_size": 143,
+   "utilization": 0.7458785608418912,
+   "correct": true
+  },
+  {
+   "train_error_permille": 600,
+   "k": 4,
+   "allocator": "linearscan",
+   "cycles": 516434,
+   "spill_memops": 82911,
+   "code_size": 166,
+   "utilization": 0.5570449360765479,
+   "correct": true
+  },
+  {
+   "train_error_permille": 600,
+   "k": 4,
+   "allocator": "freqprio",
+   "cycles": 406787,
+   "spill_memops": 52980,
+   "code_size": 140,
+   "utilization": 0.72420470694798,
+   "correct": true
+  },
+  {
+   "train_error_permille": 600,
+   "k": 4,
+   "allocator": "briggs",
+   "cycles": 424783,
+   "spill_memops": 57304,
+   "code_size": 148,
+   "utilization": 0.7280394101762162,
+   "correct": true
+  },
+  {
+   "train_error_permille": 600,
+   "k": 4,
+   "allocator": "briggsprof",
+   "cycles": 542603,
+   "spill_memops": 97928,
+   "code_size": 161,
+   "utilization": 0.5838429339396128,
+   "correct": true
+  },
+  {
+   "train_error_permille": 600,
+   "k": 8,
+   "allocator": "pgara",
+   "cycles": 357379,
+   "spill_memops": 36498,
+   "code_size": 132,
+   "utilization": 0.7299984464812801,
+   "correct": true
+  },
+  {
+   "train_error_permille": 600,
+   "k": 8,
+   "allocator": "static",
+   "cycles": 296855,
+   "spill_memops": 16334,
+   "code_size": 123,
+   "utilization": 0.8860336442859834,
+   "correct": true
+  },
+  {
+   "train_error_permille": 600,
+   "k": 8,
+   "allocator": "loopdepth",
+   "cycles": 345767,
+   "spill_memops": 32630,
+   "code_size": 132,
+   "utilization": 0.7958596355127908,
+   "correct": true
+  },
+  {
+   "train_error_permille": 600,
+   "k": 8,
+   "allocator": "linearscan",
+   "cycles": 441280,
+   "spill_memops": 61199,
+   "code_size": 152,
+   "utilization": 0.7407360336201382,
+   "correct": true
+  },
+  {
+   "train_error_permille": 600,
+   "k": 8,
+   "allocator": "freqprio",
+   "cycles": 345767,
+   "spill_memops": 32630,
+   "code_size": 132,
+   "utilization": 0.7958596355127908,
+   "correct": true
+  },
+  {
+   "train_error_permille": 600,
+   "k": 8,
+   "allocator": "briggs",
+   "cycles": 309558,
+   "spill_memops": 20554,
+   "code_size": 127,
+   "utilization": 0.8713582054989141,
+   "correct": true
+  },
+  {
+   "train_error_permille": 600,
+   "k": 8,
+   "allocator": "briggsprof",
+   "cycles": 402923,
+   "spill_memops": 40808,
+   "code_size": 140,
+   "utilization": 0.8364703760844737,
+   "correct": true
+  }
+ ],
+ "theta": 0.75
+}

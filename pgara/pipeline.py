@@ -100,7 +100,9 @@ def compile_source(source, options=None):
     report["timings"]["middle_ms"] = (time.perf_counter() - t0) * 1000
 
     # Reference execution of the optimised SSA program on the training input = profile.
+    t_prof = time.perf_counter()
     train = interp.run(module, opts["train_inputs"], opts["interp_step_limit"])
+    report["timings"]["profiling_ms"] = (time.perf_counter() - t_prof) * 1000
     test = interp.run(module, opts["test_inputs"] or opts["train_inputs"], opts["interp_step_limit"])
     report["execution"] = {"train": train.to_dict(), "test": test.to_dict()}
 
@@ -112,11 +114,15 @@ def compile_source(source, options=None):
         analyses[name] = fa
         chordal[name] = regalloc.chordal_structure(fa)
 
+    report["timings"]["analysis_ms"] = (time.perf_counter() - t0) * 1000
     allocations = {a: {} for a in opts["allocators"]}
+    report["timings"]["per_allocator_ms"] = {}
     for a in opts["allocators"]:
+        ta = time.perf_counter()
         for name, fa in analyses.items():
             allocations[a][name] = regalloc.allocate_function(
                 fa, a, k, train.edge_counts.get(name, {}), chordal[name])
+        report["timings"]["per_allocator_ms"][a] = (time.perf_counter() - ta) * 1000
     report["timings"]["allocation_ms"] = (time.perf_counter() - t0) * 1000
 
     # Per-function analysis report (interference graph, liveness, MDP gains).

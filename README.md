@@ -101,8 +101,26 @@ int main() {
 ```sh
 python3 -m pgara.bench                 # full benchmark study; writes results/results.json and results.csv
 python3 -m pgara.bench --k 4           # a single register budget
-python3 -m unittest -v tests.test_compiler   # 23 tests, about 30 seconds
+python3 -m unittest -v tests.test_compiler   # 27 tests, about 1-3 minutes
+python3 -m pgara.experiments           # extended evaluation (Draft 2 of the paper); writes results/v2/*.json
+python3 -m pgara.experiments main inputs --theta 0.75   # run selected studies only
 ```
+
+### Extended evaluation (Draft 2)
+
+`pgara/experiments.py` runs the studies reported in the revised manuscript:
+
+| Study | What it does |
+|---|---|
+| `tuning` | chooses the hot-edge threshold θ on the held-out suite in `benchmarks/tuning` (never used in reported results) |
+| `main` | original suite + independent suite (`benchmarks/extra`, translated from MiBench and BEEBS), seven allocators, k = 3, 4, 5, 6, 8, 16, 32 |
+| `inputs` | five test inputs per program at k = 4 |
+| `errsweep` | rare-branch with a training error rate from 1% to 60% |
+| `costs` | sensitivity to the model constants σ and c_mv |
+| `policy` | realised (always-in-register) gain vs the optimal-policy gain |
+| `scaling` | allocation time on generated programs of growing size |
+
+Besides the four allocators of the GUI, the harness compares a profiled-frequency priority allocator (an ablation of the MDP gain) and Chaitin–Briggs colouring with static and with profile-weighted spill costs (`regalloc.EXTRA_ALLOCATORS`). Full-window screenshots of every GUI view are in `docs/screenshots`.
 
 ---
 
@@ -110,10 +128,10 @@ python3 -m unittest -v tests.test_compiler   # 23 tests, about 30 seconds
 
 | Member | Registration No. | Role |
 |---|---|---|
-| Shreyans Chowdry | 24BDS0114 | Core pipeline design, lexical and syntax analysis, AST construction, intermediate code generation |
-| Samrender Singh Saini | 24BCE2865 | Semantic analysis, scope resolution and symbol table management |
-| Karthikeya Jami | 24BCE2136 | Code optimisation engine and target assembly / machine code generation |
-| Abhishek Kumar | 24BCE0585 | Runtime environment, test suite and benchmarking |
-| Nishanth Kumar | 24BAI0194 | Web GUI, pipeline visualisation interface and documentation |
+| Shreyans Chowdry | 24BDS0114 | Core pipeline design, lexical and syntax analysis, AST construction, intermediate code generation, web GUI; in the allocator: transition matrices, block frequencies, φ-web coalitions |
+| Samrender Singh Saini | 24BCE2865 | Semantic analysis, scope resolution and symbol table management; in the allocator: interference graph, MCS order, sealed-bid auction and binding |
+| Karthikeya Jami | 24BCE2136 | SSA, optimisation engine and PG-RISC code generation; in the allocator: residency MDP, policy iteration and gains |
+| Abhishek Kumar | 24BCE0585 | Runtime environment, simulator, test suite and benchmarking; in the allocator: best response, coalition repair, baselines and ablations |
+| Nishanth Kumar | 24BAI0194 | Documentation and interface testing support |
 
 The `paper` folder holds the IEEE manuscript (`pgara.tex`, its compiled PDF and the files needed to rebuild it with `pdflatex pgara.tex`, run twice). The `guide` folder holds **PGARA-Project-Guide.pdf**, a plain-language explanation of the whole project, the research behind it, the code and the website.

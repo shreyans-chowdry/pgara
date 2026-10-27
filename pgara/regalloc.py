@@ -37,6 +37,10 @@ class CostModel:
     MOVE = 1           # register-to-register move
     GAMMA = 0.999      # discount used only if a chain is not transient
     STATIC_LOOP = 0.9  # static prior: probability of staying inside a loop
+    THETA = 0.75       # hot-edge threshold for phi-web coalitions (tuned on
+                       # the held-out suite benchmarks/tuning, see experiments.py)
+    GAIN_POLICY = "forced"  # "forced": always-in-register policy (what code
+                            # generation realises); "optimal": V* of the MDP
 
 
 # ---------------------------------------------------------------- analyses
@@ -403,6 +407,31 @@ class ValueMDP:
         res = self.evaluate(policy, gamma)
         return None if res is None else res[1]
 
+    def register_only(self, gamma):
+        """Value of the policy the code generator actually realises for an
+        auction winner: the value never leaves its register inside the live
+        range (no live-range splitting), i.e. state R under the forced action
+        'stay' in every block."""
+        policy = {(b, st): "stay" for b in self.blocks for st in ("R", "M")}
+        res = self.evaluate(policy, gamma)
+        return None if res is None else res[0]
+
+    def solve_both(self):
+        """Return (g_opt, g_forced, rounds, policy, splits): the per-entry gain
+        under the optimal policy V* and under the forced always-in-register
+        policy, and whether the optimal policy spills or reloads anywhere
+        inside the live range (i.e. would need live-range splitting)."""
+        for gamma in (1.0, CostModel.GAMMA):
+            res = self.policy_iteration(gamma)
+            mem = self.memory_only(gamma) if res is not None else None
+            reg = self.register_only(gamma) if mem is not None else None
+            if res is not None and mem is not None and reg is not None:
+                break
+        VR, VM, policy, rounds = res
+        d = self.def_block
+        splits = any(a != "stay" for a in policy.values())
+        return VR[d] - mem[d], reg[d] - mem[d], rounds, policy, splits
+
     def solve(self):
         """Per-entry gain G = V*(def,R) - V_mem(def): the optimal expected
         reward of entering the live range with a register, minus the reward
@@ -437,19 +466,27 @@ def block_frequencies(fa, P):
     return {b: 1.0 for b in blocks}
 
 
-def compute_gains(fa, P):
-    """G(v) = f(def(v)) * (V*(def,R) - V_mem(def)): the expected
-    register-residency gain of v per invocation of its function."""
+def compute_gains(fa, P, policy=None, detail=None):
+    """G(v) = f(def(v)) * (V_pi(def,R) - V_mem(def)): the expected
+    register-residency gain of v per invocation of its function, where pi is
+    the forced always-in-register policy that code generation realises
+    (default) or the optimal MDP policy V* (policy="optimal").  If `detail`
+    is a dict it receives, per value, both gains and whether V* would split
+    the live range."""
+    policy = policy or CostModel.GAIN_POLICY
     rpo = reverse_postorder(fa.fn)
     rpo_index = {b: i for i, b in enumerate(rpo)}
     freq = block_frequencies(fa, P)
     gains, rounds, sizes = {}, {}, {}
     for v in fa.values:
         mdp = ValueMDP(fa, v, P, rpo_index)
-        per_entry, r, _ = mdp.solve()
-        gains[v] = freq[fa.def_block[v]] * per_entry
+        g_opt, g_forced, r, _, splits = mdp.solve_both()
+        f = freq[fa.def_block[v]]
+        gains[v] = f * (g_forced if policy == "forced" else g_opt)
         rounds[v] = r
         sizes[v] = len(mdp.blocks)
+        if detail is not None:
+            detail[v] = {"opt": f * g_opt, "forced": f * g_forced, "splits": splits}
     return gains, rounds, sizes
 
 
@@ -466,6 +503,117 @@ def loop_depth_weights(fa):
             total += c * 10 ** fa.depth.get(b, 0)
         w[v] = total
     return w
+
+
+def frequency_weights(fa, P):
+    """Profile-weighted spill cost (ablation): the 10^depth weight of the
+    loop-depth allocator replaced by the block frequency phi(b) of
+    (I - P^T) phi = e_entry under the given transition matrix."""
+    freq = block_frequencies(fa, P)
+    w = {}
+    for v in fa.values:
+        total = 0.0
+        for table in (fa.acc_use[v], fa.acc_def[v], fa.acc_fwd[v]):
+            for b, c in table.items():
+                total += c * freq.get(b, 0.0)
+        w[v] = total
+    return w
+
+
+def spill_costs(fa, P=None):
+    """Chaitin-style spill cost: (load per use + store per def) weighted by
+    10^depth (static) or by profiled block frequency (when P is given)."""
+    freq = block_frequencies(fa, P) if P is not None else None
+    cost = {}
+    for v in fa.values:
+        total = 0.0
+        for table, c_acc in ((fa.acc_use[v], CostModel.LOAD), (fa.acc_def[v], CostModel.STORE),
+                             (fa.acc_fwd[v], CostModel.MOVE)):
+            for b, c in table.items():
+                wgt = freq.get(b, 0.0) if freq is not None else 10 ** fa.depth.get(b, 0)
+                total += c * c_acc * wgt
+        if v in fa.param:
+            total -= CostModel.LOAD * (freq.get(fa.def_block[v], 0.0) if freq is not None else 1)
+        cost[v] = total
+    return cost
+
+
+def chaitin_briggs(fa, k, cost):
+    """Chaitin-Briggs graph colouring with conservative (Briggs) coalescing
+    of phi-related values and optimistic spilling.  Phi operands and results
+    that do not interfere are merged when the merged node has fewer than k
+    neighbours of significant degree; simplify then removes nodes of degree
+    < k, and when none remains pushes the node with the smallest
+    cost/degree as a potential spill; select assigns colours in reverse
+    order, and potential spills that find no colour become actual spills
+    (with all members of their coalesced node).  Spilled values live in
+    memory and use scratch registers, so no rebuild is needed."""
+    order_key = lambda v: fa.def_order[v]
+    rep = {v: v for v in fa.values}
+
+    def find(x):
+        while rep[x] != x:
+            rep[x] = rep[rep[x]]
+            x = rep[x]
+        return x
+
+    nadj = {v: set(fa.adj[v]) for v in fa.values}
+    members = {v: [v] for v in fa.values}
+    pairs = []
+    for blk in fa.fn.blocks:
+        for phi in blk.phis():
+            for a in phi.phi.values():
+                if isinstance(a, str) and a in rep:
+                    pairs.append((phi.dst, a))
+    changed = True
+    while changed:
+        changed = False
+        for x, y in pairs:
+            rx, ry = find(x), find(y)
+            if rx == ry or ry in nadj[rx]:
+                continue
+            union = (nadj[rx] | nadj[ry]) - {rx, ry}
+            significant = sum(1 for w in union if len(nadj[w]) >= k)
+            if significant >= k:
+                continue
+            keep, drop = (rx, ry) if order_key(rx) <= order_key(ry) else (ry, rx)
+            rep[drop] = keep
+            for w in nadj[drop]:
+                nadj[w].discard(drop)
+                if w != keep:
+                    nadj[w].add(keep)
+                    nadj[keep].add(w)
+            del nadj[drop]
+            members[keep].extend(members.pop(drop))
+            changed = True
+    nodes = list(nadj)
+    ncost = {n: sum(cost[v] for v in members[n]) for n in nodes}
+    degree = {n: len(nadj[n]) for n in nodes}
+    removed, stack = set(), []
+    remaining = set(nodes)
+    while remaining:
+        low = [n for n in remaining if degree[n] < k]
+        if low:
+            n = min(low, key=order_key)
+        else:
+            n = min(remaining, key=lambda u: (ncost[u] / max(degree[u], 1), order_key(u)))
+        remaining.discard(n)
+        removed.add(n)
+        stack.append(n)
+        for w in nadj[n]:
+            if w not in removed:
+                degree[w] -= 1
+    colour = {}
+    for n in reversed(stack):
+        taken = {colour[w] for w in nadj[n] if w in colour}
+        free = [r for r in range(k) if r not in taken]
+        if free:
+            # Biased colouring: prefer a colour already held by a phi-web
+            # partner that could not be coalesced.
+            partners = {find(w) for v in members[n] for w in fa.webs[v]} - {n}
+            hinted = [colour[p] for p in sorted(partners, key=order_key) if p in colour and colour[p] in free]
+            colour[n] = hinted[0] if hinted else free[0]
+    return {v: colour[n] for n in colour for v in members[n]}
 
 
 # ----------------------------------------------------------- the auction
@@ -510,19 +658,20 @@ def bind_registers(order, adj, winners, k, webs=None):
     return reg, demoted
 
 
-def best_response(order, adj, reg, bids, k, webs, order_key, groups=None):
+def best_response(order, adj, reg, bids, k, webs, order_key, groups=None, excluded=frozenset()):
     """Best-response dynamics after the auction: a spilled coalition whose
     members all find a register left unused by their winning neighbours
     deviates and takes them (highest bid first), repeated until no spilled
     coalition can improve its payoff unilaterally, i.e. the allocation is a
-    pure Nash equilibrium of the register game.  Returns the number of
-    deviations."""
+    pure Nash equilibrium of the register game.  Coalitions in `excluded`
+    (those that conceded in coalition repair) have left the game and are
+    never reconsidered.  Returns the number of deviations."""
     groups = groups or {v: (v,) for v in order}
     deviations = 0
     changed = True
     while changed:
         changed = False
-        losers = sorted({groups[v] for v in order if v not in reg},
+        losers = sorted({groups[v] for v in order if v not in reg and groups[v] not in excluded},
                         key=lambda g: (-bids[g[0]], min(order_key(v) for v in g)))
         for g in losers:
             if bids[g[0]] <= 0:
@@ -551,7 +700,8 @@ def repair_coalitions(fa, P, reg, gains, groups):
     """A coalition left split between registers and memory pays a copy
     through memory on every hot phi edge joining a winner and a loser.  When
     that expected penalty exceeds the winners' own gain, the winners concede
-    (the coalition leaves the game together).  Returns the values demoted."""
+    (the coalition leaves the game together).  Returns the values demoted;
+    their coalitions are excluded from any later best-response pass."""
     freq = block_frequencies(fa, P)
     demoted = []
     for g in {groups[v] for v in fa.values}:
@@ -575,13 +725,14 @@ def repair_coalitions(fa, P, reg, gains, groups):
     return demoted
 
 
-def coalitions(fa, P, theta=0.25):
+def coalitions(fa, P, theta=None):
     """Coalitions of SSA values that bid together: phi-related values are
     merged only across *hot* phi edges, i.e. edges that carry at least theta
     of the executions of the more frequent of the two definitions.  A loop-
     carried variable thus forms one coalition around its back edge, while a
     copy made once on loop entry (or on a rare path) does not drag a cold
     value into a hot coalition."""
+    theta = CostModel.THETA if theta is None else theta
     freq = block_frequencies(fa, P)
     parent = {v: v for v in fa.values}
 
@@ -679,11 +830,16 @@ def linear_scan(fa, k):
 
 # ----------------------------------------------------------- driver
 ALLOCATORS = ("pgara", "static", "loopdepth", "linearscan")
+# Additional baselines used by the benchmark harness (not shown in the GUI).
+EXTRA_ALLOCATORS = ("freqprio", "briggs", "briggsprof")
 ALLOCATOR_NAMES = {
     "pgara": "PGARA (profiled)",
     "static": "Static-Prior PGARA",
     "loopdepth": "Loop-depth priority",
     "linearscan": "Linear scan",
+    "freqprio": "Profiled-frequency priority",
+    "briggs": "Chaitin-Briggs (static costs)",
+    "briggsprof": "Chaitin-Briggs (profiled costs)",
 }
 
 
@@ -725,10 +881,17 @@ def allocate_function(fa, allocator, k, edge_counts=None, chordal_info=None):
         alloc.extra["deviations"] = best_response(order, fa.adj, reg, bids, k, fa.webs, key, groups)
         alloc.extra["conceded"] = repair_coalitions(fa, P, reg, gains, groups)
         if alloc.extra["conceded"]:
-            alloc.extra["deviations"] += best_response(order, fa.adj, reg, bids, k, fa.webs, key, groups)
-    elif allocator == "loopdepth":
-        gains = loop_depth_weights(fa)
-        bids, groups = coalition_bids(fa, gains, static_probabilities(fa))
+            left = frozenset(groups[v] for v in alloc.extra["conceded"])
+            alloc.extra["deviations"] += best_response(order, fa.adj, reg, bids, k, fa.webs, key,
+                                                       groups, excluded=left)
+    elif allocator in ("loopdepth", "freqprio"):
+        if allocator == "loopdepth":
+            Pc = static_probabilities(fa)
+            gains = loop_depth_weights(fa)
+        else:
+            Pc = profiled_probabilities(fa, edge_counts or {})
+            gains = frequency_weights(fa, Pc)
+        bids, groups = coalition_bids(fa, gains, Pc)
         alloc.extra["coalitions"] = sorted({g for g in groups.values() if len(g) > 1})
         alloc.gains = gains
         alloc.bids = bids
@@ -736,6 +899,12 @@ def allocate_function(fa, allocator, k, edge_counts=None, chordal_info=None):
         alloc.rounds = auction_rounds
         reg, demoted = bind_registers(order, fa.adj, decided, k, fa.webs)
         alloc.extra["deviations"] = best_response(order, fa.adj, reg, bids, k, fa.webs, key, groups)
+    elif allocator in ("briggs", "briggsprof"):
+        P = profiled_probabilities(fa, edge_counts or {}) if allocator == "briggsprof" else None
+        cost = spill_costs(fa, P)
+        alloc.gains = cost
+        reg = chaitin_briggs(fa, k, cost)
+        demoted = []
     elif allocator == "linearscan":
         reg, extra = linear_scan(fa, k)
         alloc.extra.update(extra)

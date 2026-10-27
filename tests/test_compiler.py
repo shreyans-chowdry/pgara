@@ -246,7 +246,37 @@ class MDPTests(unittest.TestCase):
         self.assertGreater(max(gains[v] for v in hot), 10 * max(gains[v] for v in cold))
 
 
+    def test_forced_gain_never_exceeds_optimal_gain(self):
+        # Always-in-register is one admissible policy, so its value is
+        # bounded by the optimum V*; equality holds unless V* splits.
+        module = ssa_module(load("05_rarebranch"))
+        counts = interp.run(module, [7, 10]).edge_counts
+        for fn in module.functions.values():
+            fa = regalloc.FunctionAnalysis(fn)
+            P = regalloc.profiled_probabilities(fa, counts.get(fn.name, {}))
+            detail = {}
+            regalloc.compute_gains(fa, P, detail=detail)
+            for v, d in detail.items():
+                self.assertLessEqual(d["forced"], d["opt"] + 1e-7)
+                if not d["splits"]:
+                    self.assertAlmostEqual(d["forced"], d["opt"], places=6)
+
+
 class AuctionTests(unittest.TestCase):
+    def test_conceded_coalitions_never_re_enter(self):
+        # Two non-interfering spilled values with free registers: best
+        # response takes both unless one coalition has left the game.
+        adj = {"a": set(), "b": set()}
+        bids = {"a": 5.0, "b": 3.0}
+        groups = {"a": ("a",), "b": ("b",)}
+        reg = {}
+        n = regalloc.best_response(["a", "b"], adj, reg, bids, 2, {}, lambda v: v, groups,
+                                   excluded=frozenset({("a",)}))
+        self.assertEqual(n, 1)
+        self.assertNotIn("a", reg)
+        self.assertIn("b", reg)
+
+
     def test_capacity_binding_and_nash_property(self):
         for name, _, train, _ in SUITE:
             module = ssa_module(load(name))
@@ -268,6 +298,36 @@ class AuctionTests(unittest.TestCase):
                         if al.bids.get(v, 0) > 0 and v not in in_coalition:
                             free = set(range(k)) - {al.reg[w] for w in fa.adj[v] if w in al.reg}
                             self.assertFalse(free, f"{name}:{fn.name}: {v} could deviate")
+
+
+class BaselineTests(unittest.TestCase):
+    def test_extra_baselines_are_feasible(self):
+        for name, _, train, _ in SUITE:
+            module = ssa_module(load(name))
+            counts = interp.run(module, train, 20_000_000).edge_counts
+            for fn in module.functions.values():
+                fa = regalloc.FunctionAnalysis(fn)
+                ch = regalloc.chordal_structure(fa)
+                for a in regalloc.EXTRA_ALLOCATORS:
+                    for k in (2, 3, 5):
+                        al = regalloc.allocate_function(fa, a, k, counts.get(fn.name, {}), ch)
+                        for v, r in al.reg.items():
+                            self.assertLess(r, k)
+                            for w in fa.adj[v]:
+                                self.assertFalse(w in al.reg and al.reg[w] == r, f"{name} {a}")
+
+    def test_extra_baselines_and_suites_match_reference_output(self):
+        from pgara.experiments import EXTRA, source
+        cases = [(load(n), tr, te) for n, _, tr, te in SUITE]
+        cases += [(source(n), tr, te[0]) for n, _, tr, te in EXTRA]
+        allocs = list(regalloc.ALLOCATORS) + list(regalloc.EXTRA_ALLOCATORS)
+        for src, train, test in cases:
+            r = compile_source(src, {"k": 3, "train_inputs": train, "test_inputs": test,
+                                     "allocators": allocs,
+                                     "interp_step_limit": 20_000_000, "sim_step_limit": 80_000_000})
+            self.assertTrue(r["ok"])
+            for a in allocs:
+                self.assertTrue(r["targets"][a]["stats"]["matches_reference"], a)
 
 
 class EndToEndTests(unittest.TestCase):
