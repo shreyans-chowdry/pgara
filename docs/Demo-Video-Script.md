@@ -2,17 +2,28 @@
 
 **Team 14 · Compiler Design · L43+L44**
 
-**Before recording:** open https://pgara.vercel.app, or run `scripts/run_gui.sh` and open http://127.0.0.1:8765. Also keep the GitHub repository open in a second tab and a terminal in the project folder.
+## How to record it on Google Meet
 
-**Settings used throughout:** Program **Rare error branch**, Registers **k = 4**, Training input **7 10**, Test input **13 10**.
+1. **Joining.** All five join the Meet, cameras on. One person starts **Record** (Activities → Recording); a Workspace account such as your VIT account is needed for this.
+2. **Screen.** One screen-sharer, the **driver** (Shreyans), shares the browser tab for the whole video. Each speaker talks in turn while the driver does the action written in *italics*. Speakers don't need to share their own screens.
+3. **Before you start,** the driver opens three things:
+   - https://pgara.vercel.app, or http://127.0.0.1:8765 after `scripts/run_gui.sh`,
+   - the GitHub repository in a second tab,
+   - a terminal in the project folder, for parts 2 and 6. Share the whole screen, or switch the shared tab, when the terminal is needed.
+4. **Settings used throughout:** Program **Rare error branch**, Registers **k = 4**, Training input **7 10**, Test input **13 10**. Zoom the browser to 110–125% so the text is readable in the recording.
+5. **During the recording:**
+   - Everyone stays muted except the current speaker.
+   - Each speaker ends with a short hand-off, e.g. "Over to Samrender."
+   - Do a quick rehearsal first, so the total stays between 4 and 7 minutes.
+6. **After the meeting,** the recording arrives in the organiser's Google Drive (Meet Recordings folder). Download it as MP4 and share it so it can be added to `docs/demo/` in the repository.
 
-Each person shares their screen for their own part. Times are approximate.
+Times are approximate.
 
 ---
 
 ## 1. Introduction — Shreyans Chowdry (0:00 – 0:45)
 
-**Screen:** the home page of the Compiler Studio.
+**Driver shows:** the home page of the Compiler Studio.
 
 > "Hello, we are Team 14. I'm Shreyans Chowdry, and with me are Samrender Singh Saini, Karthikeya Jami, Abhishek Kumar and Nishanth Kumar. Our project is PGARA, Profile-Guided Adaptive Register Allocation.
 >
@@ -22,7 +33,7 @@ Each person shares their screen for their own part. Times are approximate.
 
 ## 2. Setup and the Studio — Nishanth Kumar (0:45 – 1:35)
 
-**Screen:** the GitHub README, then the terminal, then the website.
+**Driver shows:** the GitHub README, then the terminal, then the website.
 
 > "I'll show how anyone can run the project. The README lists the requirements: only Python 3.8 or newer, with no extra packages.
 >
@@ -40,7 +51,7 @@ Each person shares their screen for their own part. Times are approximate.
 
 ## 3. Front end — Shreyans Chowdry (1:35 – 2:30)
 
-**Screen:** the Tokens, AST, TAC and Grammar tabs.
+**Driver shows:** the Tokens, AST, TAC and Grammar tabs.
 
 > "**Tokens:** the lexer is a maximal-munch DFA, so it always takes the longest token. `<=` and `++` become single tokens, each colour-coded by kind.
 >
@@ -54,7 +65,7 @@ Each person shares their screen for their own part. Times are approximate.
 
 ## 4. Semantic analysis — Samrender Singh Saini (2:30 – 3:10)
 
-**Screen:** the Symbols tab, then the editor.
+**Driver shows:** the Symbols tab, then the editor.
 
 > "This is the Symbols tab. Semantic analysis keeps a stack of scopes. Every variable gets a unique IR name, so the `i` of an inner loop becomes `i#1` and never clashes with an outer `i`. Types, function arity and array use are all checked here.
 >
@@ -64,7 +75,7 @@ Each person shares their screen for their own part. Times are approximate.
 
 ## 5. Optimiser, profile and the PGARA allocator — Karthikeya Jami (3:10 – 4:25)
 
-**Screen:** the SSA & Optimiser tab, then CFG, then Allocation.
+**Driver shows:** the SSA & Optimiser tab, then CFG, then Allocation.
 
 > "**SSA & Optimiser:** the code is converted into SSA form, with φ-functions at the loop head, and then optimised with constant propagation, GVN and dead-code elimination.
 >
@@ -78,7 +89,7 @@ Each person shares their screen for their own part. Times are approximate.
 
 ## 6. Results and testing — Abhishek Kumar (4:25 – 5:40)
 
-**Screen:** the Run & Metrics tab, then the terminal, then `results/README.md` on GitHub.
+**Driver shows:** the Run & Metrics tab, then the terminal, then `results/README.md` on GitHub.
 
 > "I worked on the simulator, the tests and the benchmarking. **Run & Metrics** runs the generated PG-RISC code on our cycle-counting simulator and compares the allocators. On this program PGARA needs 338,000 cycles against 516,000 for linear scan, and every allocator's output matches the reference interpreter.
 >
@@ -95,7 +106,7 @@ Each person shares their screen for their own part. Times are approximate.
 
 ## 7. Limitations, repository and conclusion — Nishanth Kumar (5:40 – 6:20)
 
-**Screen:** the GitHub repository front page.
+**Driver shows:** the GitHub repository front page.
 
 > "To be honest about the limits:
 > - the benefit appears when registers are scarce, eight or fewer;
@@ -112,7 +123,11 @@ Each person shares their screen for their own part. Times are approximate.
 
 ---
 
-### Recording tips
-- Record at 1080p and zoom the browser to 110–125% so the text is readable.
-- Each speaker can record their part separately; join the clips in order.
-- Keep every part within its time, so the total stays between 4 and 7 minutes.
+### Hand-offs (say at the end of each part)
+1 → "Nishanth will show how to set it up."
+2 → "Back to Shreyans for the front end."
+3 → "Samrender will explain semantic analysis."
+4 → "Karthikeya will take you through the allocator."
+5 → "Abhishek will show the results and tests."
+6 → "Nishanth will cover the limitations and the repository."
+7 → "Shreyans will close."
