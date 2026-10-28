@@ -1,0 +1,135 @@
+{
+ "configurations": 833,
+ "all_correct": true,
+ "theta": 0.75,
+ "geomean_vs_linear_scan": {
+  "3": {
+   "pgara": 0.794829632580793,
+   "static": 0.8206277527490038,
+   "freqprio": 0.8244175171172108,
+   "loopdepth": 0.8464358418885424,
+   "briggsprof": 0.804092319235754,
+   "briggs": 0.8241796800563829,
+   "linearscan": 1.0
+  },
+  "4": {
+   "pgara": 0.7817088861158651,
+   "static": 0.8029312784085944,
+   "freqprio": 0.8082369877047575,
+   "loopdepth": 0.8246732521803709,
+   "briggsprof": 0.812082422940263,
+   "briggs": 0.8303570505320265,
+   "linearscan": 1.0
+  },
+  "5": {
+   "pgara": 0.8044428464786306,
+   "static": 0.8132687796031621,
+   "freqprio": 0.8360988242712715,
+   "loopdepth": 0.8521093377422476,
+   "briggsprof": 0.8419814902226491,
+   "briggs": 0.8534537453842349,
+   "linearscan": 1.0
+  },
+  "6": {
+   "pgara": 0.8054709767203655,
+   "static": 0.8198130024175638,
+   "freqprio": 0.8461847156752325,
+   "loopdepth": 0.8606855320293865,
+   "briggsprof": 0.8416315751158384,
+   "briggs": 0.8516652286557806,
+   "linearscan": 1.0
+  },
+  "8": {
+   "pgara": 0.8072576545527039,
+   "static": 0.8187120342939137,
+   "freqprio": 0.8418976552057557,
+   "loopdepth": 0.847785104275571,
+   "briggsprof": 0.8369221279105894,
+   "briggs": 0.84065098227789,
+   "linearscan": 1.0
+  },
+  "16": {
+   "pgara": 0.8430461457527797,
+   "static": 0.8430461457527797,
+   "freqprio": 0.8430461457527797,
+   "loopdepth": 0.8430461457527797,
+   "briggsprof": 0.8406523452485587,
+   "briggs": 0.8406523452485587,
+   "linearscan": 1.0
+  },
+  "32": {
+   "pgara": 0.890681785303416,
+   "static": 0.890681785303416,
+   "freqprio": 0.890681785303416,
+   "loopdepth": 0.890681785303416,
+   "briggsprof": 0.888152725040818,
+   "briggs": 0.888152725040818,
+   "linearscan": 1.0
+  }
+ },
+ "spill_memops": {
+  "3": {
+   "pgara": 1915169,
+   "static": 2192760,
+   "freqprio": 1967620,
+   "loopdepth": 2284810,
+   "briggsprof": 1887008,
+   "briggs": 1935300,
+   "linearscan": 2911238
+  },
+  "4": {
+   "pgara": 1100831,
+   "static": 1427803,
+   "freqprio": 1246262,
+   "loopdepth": 1259634,
+   "briggsprof": 1290115,
+   "briggs": 1333879,
+   "linearscan": 2192849
+  },
+  "5": {
+   "pgara": 677926,
+   "static": 698680,
+   "freqprio": 785645,
+   "loopdepth": 845555,
+   "briggsprof": 875320,
+   "briggs": 874711,
+   "linearscan": 1488122
+  },
+  "6": {
+   "pgara": 320390,
+   "static": 381852,
+   "freqprio": 498035,
+   "loopdepth": 538730,
+   "briggsprof": 536513,
+   "briggs": 494115,
+   "linearscan": 934693
+  },
+  "8": {
+   "pgara": 67607,
+   "static": 137323,
+   "freqprio": 205271,
+   "loopdepth": 193891,
+   "briggsprof": 171682,
+   "briggs": 180868,
+   "linearscan": 592789
+  },
+  "16": {
+   "pgara": 0,
+   "static": 0,
+   "freqprio": 0,
+   "loopdepth": 0,
+   "briggsprof": 0,
+   "briggs": 0,
+   "linearscan": 127571
+  },
+  "32": {
+   "pgara": 0,
+   "static": 0,
+   "freqprio": 0,
+   "loopdepth": 0,
+   "briggsprof": 0,
+   "briggs": 0,
+   "linearscan": 14
+  }
+ }
+}

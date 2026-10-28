@@ -286,6 +286,26 @@ def study_scaling(out, theta):
     return {"rows": rows}
 
 
+CONFIG = {}
+
+
+def apply_config(path):
+    """Load a JSON configuration (configs/experiments.json) and apply it."""
+    global KS
+    with open(path) as f:
+        cfg = json.load(f)
+    CONFIG.update(cfg)
+    if "k_values" in cfg:
+        KS = [int(k) for k in cfg["k_values"]]
+    cm = cfg.get("cost_model", {})
+    for key, attr in (("load", "LOAD"), ("store", "STORE"), ("register_access_bonus", "SAVE"),
+                      ("forwarded_move", "MOVE"), ("static_loop_stay", "STATIC_LOOP")):
+        if key in cm:
+            setattr(regalloc.CostModel, attr, cm[key])
+    if "gain_policy" in cfg:
+        regalloc.CostModel.GAIN_POLICY = cfg["gain_policy"]
+
+
 STUDIES = ["tuning", "main", "inputs", "errsweep", "costs", "policy", "scaling"]
 
 
@@ -294,7 +314,14 @@ def main():
     ap.add_argument("studies", nargs="*", default=STUDIES)
     ap.add_argument("--out", default=os.path.join(ROOT, "results", "v2"))
     ap.add_argument("--theta", type=float, default=None)
+    ap.add_argument("--config", default=None,
+                    help="JSON file overriding k_values, theta and the cost-model constants "
+                         "(see configs/experiments.json)")
     args = ap.parse_args()
+    if args.config:
+        apply_config(args.config)
+        if args.theta is None and "theta" in CONFIG:
+            args.theta = CONFIG["theta"]
     os.makedirs(args.out, exist_ok=True)
     theta = args.theta
     if "tuning" in args.studies:

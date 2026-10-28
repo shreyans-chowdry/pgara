@@ -1,0 +1,6 @@
+# PGARA runs on the Python 3 standard library only (Python >= 3.8; tested with 3.13).
+# There are no runtime dependencies, so `pip install -r requirements.txt` installs nothing.
+#
+# Optional tools, used only for development (not needed to run or reproduce results):
+#   coverage==7.6.1     # measure test coverage:   python3 -m coverage run -m unittest tests.test_compiler
+#   playwright==1.48.0  # regenerate GUI screenshots and the demo video (scripts/record_demo.py)

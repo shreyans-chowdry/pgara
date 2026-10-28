@@ -1,0 +1,8 @@
+Program: benchmarks/05_rarebranch.mc  k=4  train=[7, 10]  test=[13, 10]
+Reference output: [802752, 1187980, 4052, 199, 44, -220, 1016, 975]
+
+Allocator                  cycles  spill memops reg. util code size correct
+pgara                      338389         28835     0.787       146 True
+static                     358163         36772     0.770       138 True
+loopdepth                  414979         52980     0.746       143 True
+linearscan                 516434         82911     0.557       166 True

@@ -1,0 +1,3 @@
+# Optional development tools (see requirements.txt)
+coverage==7.6.1
+playwright==1.48.0

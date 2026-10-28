@@ -1,12 +1,11 @@
 %% =====================================================================
 %%  PGARA: Profile-Guided Adaptive Register Allocation
-%%  IEEE conference manuscript (IEEEtran).  Compile with:
+%%  IEEE Access manuscript (ieeeaccess.cls).  Compile with:
 %%      pdflatex pgara && pdflatex pgara
 %%  External files are the GUI screenshots gui_*.png; the manuscript still
 %%  compiles (with framed boxes in their place) if they are missing.
 %% =====================================================================
-\documentclass[conference]{IEEEtran}
-\IEEEoverridecommandlockouts
+\documentclass{ieeeaccess}
 
 \usepackage{cite}
 \usepackage{amsmath,amssymb,amsfonts}
@@ -20,6 +19,7 @@
 \usepackage{multirow}
 \usepackage{array}
 \usepackage{url}
+\usepackage[hidelinks]{hyperref}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit,calc,backgrounds}
 \usepackage{pgfplots}
@@ -42,6 +42,8 @@
 \definecolor{cSP}{HTML}{0EA5E9}
 \definecolor{cLD}{HTML}{F59E0B}
 \definecolor{cLS}{HTML}{64748B}
+\definecolor{cFP}{HTML}{10B981}
+\definecolor{cCBp}{HTML}{E11D48}
 
 \newtheorem{definition}{Definition}
 \newtheorem{proposition}{Proposition}
@@ -72,84 +74,80 @@
 }
 
 \begin{document}
+\newlength{\xfigwd}
+\setlength{\xfigwd}{\columnwidth}
 
-\title{PGARA: Profile-Guided Adaptive Register Allocation\\[2pt]
-\large Stochastic Dynamic Programming and Game-Theoretic Auctions in an
-End-to-End Compiler, Without Graph Colouring}
+\history{Date of publication xxxx 00, 0000, date of current version xxxx 00, 0000.}
+\doi{10.1109/ACCESS.2026.DOI}
 
-\author{
-\IEEEauthorblockN{Shreyans Chowdry}
-\IEEEauthorblockA{Reg.\ No.\ 24BDS0114\\
-Vellore Institute of Technology\\Vellore, India}
-\and
-\IEEEauthorblockN{Samrender Singh Saini}
-\IEEEauthorblockA{Reg.\ No.\ 24BCE2865\\
-Vellore Institute of Technology\\Vellore, India}
-\and
-\IEEEauthorblockN{Karthikeya Jami}
-\IEEEauthorblockA{Reg.\ No.\ 24BCE2136\\
-Vellore Institute of Technology\\Vellore, India}
-\and
-\IEEEauthorblockN{Abhishek Kumar}
-\IEEEauthorblockA{Reg.\ No.\ 24BCE0585\\
-Vellore Institute of Technology\\Vellore, India}
-\and
-\IEEEauthorblockN{Nishanth Kumar}
-\IEEEauthorblockA{Reg.\ No.\ 24BAI0194\\
-Vellore Institute of Technology\\Vellore, India}
-}
+\title{PGARA: Profile-Guided Adaptive Register Allocation via Markov
+Decision Processes and Game-Theoretic Auctions}
+
+\author{\uppercase{Shreyans Chowdry}\authorrefmark{1},
+\uppercase{Samrender Singh Saini}\authorrefmark{1},
+\uppercase{Karthikeya Jami}\authorrefmark{1},
+\uppercase{Abhishek Kumar}\authorrefmark{1}, and
+\uppercase{Nishanth Kumar}\authorrefmark{1}}
+
+\address[1]{School of Computer Science and Engineering, Vellore Institute
+of Technology, Vellore, Tamil Nadu 632014, India (e-mail:
+shreyans.chowdry2024@vitstudent.ac.in;
+samrender.singh2024@vitstudent.ac.in;
+jami.karthikeya2024@vitstudent.ac.in;
+abhishek.kumar2024b@vitstudent.ac.in;
+akula.nishanthkumar2024@vitstudent.ac.in)}
+
+\tfootnote{This work received no external funding.}
+
+\markboth
+{Chowdry \headeretal: PGARA: Profile-Guided Adaptive Register Allocation}
+{Chowdry \headeretal: PGARA: Profile-Guided Adaptive Register Allocation}
+
+\corresp{Corresponding author: Shreyans Chowdry (e-mail: shreyans.chowdry2024@vitstudent.ac.in).}
+
+\begin{abstract}
+The register allocator decides which values a compiler keeps in a
+processor's few registers, and the right decision depends on how often
+each path through the program is actually taken. Production allocators
+rank spill candidates by access counts weighted by loop depth or, with a
+profile, by block frequency; learned allocators train opaque policies on
+large corpora. We present PGARA (Profile-Guided Adaptive Register
+Allocation), which models the residency of every SSA value as a
+two-state Markov decision process over the control-flow graph with
+profiled transition probabilities. Policy evaluation yields each value's
+expected cycles saved under the policy the code generator realises;
+values on a loop-carried $\varphi$-web bid as one coalition; registers
+are sold in a sealed-bid auction along a maximum-cardinality-search
+order of the chordal SSA interference graph; and best-response dynamics
+reach a pure Nash equilibrium. PGARA is embedded in a complete compiler
+for a C subset, from a DFA lexer and LL(1) parser to SSA optimisation,
+code generation and a cycle-counting simulator, with a web interface
+that visualises every phase. On 17 programs, seven of them translated
+from MiBench and BEEBS, and register budgets from 3 to 32, all 1{,}428
+configurations reproduce the reference output. At four registers PGARA
+lowers geometric-mean cycles by 21.8\% relative to linear scan, 3.7\%
+relative to Chaitin--Briggs colouring with profile-weighted spill costs,
+3.3\% relative to profile-weighted priority allocation and 2.6\%
+relative to static branch priors, and halves spill traffic relative to
+linear scan. The benefit is stable across test inputs, confined to
+budgets of eight registers or fewer, and requires a representative
+profile.
+\end{abstract}
+
+\begin{keywords}
+Compiler design, game theory, Markov decision process,
+profile-guided optimisation, register allocation, static single
+assignment.
+\end{keywords}
+
+\titlepgskip=-15pt
 
 \maketitle
 
-%% ---------------------------------------------------------------------
-\begin{abstract}
-Optimising compilers translate high-level programs into machine code
-for processors with only a handful of fast registers, and the register
-allocator, which decides which values live in those registers, is one of
-the largest single contributors to the quality of the generated code.
-The allocator has to decide, for every value, whether to keep it in a
-register or spill it to memory, and the right answer depends on how
-often each path through the program is actually taken, which the
-compiler does not know statically.
-Production allocators colour an interference graph or scan live
-intervals, ranking spill candidates by static use counts or
-$10^{\text{loop depth}}$ weights; recent learned allocators train neural
-policies on large corpora.
-Static weights are blind to data-dependent branches, and learned
-policies are costly to train and offer no per-decision explanation.
-We present PGARA (Profile-Guided Adaptive Register Allocation), which
-adapts every register decision to the program's measured behaviour. It
-models the residency of every SSA value as a
-two-state Markov decision process over the control-flow graph, with
-transition probabilities measured by profiling. Exact policy iteration
-yields each value's expected register-residency gain, values sharing a
-loop-carried $\varphi$-web bid as one coalition, and registers are sold
-in a sealed-bid auction along a maximum-cardinality-search order of the
-chordal SSA interference graph, refined by best-response dynamics to a
-pure Nash equilibrium. \MG\ is embedded in a complete compiler for a
-C subset (DFA lexer, LL(1) parser, attribute-grammar semantic analysis,
-three-address code, SSA optimiser, PG-RISC code generator and
-cycle-counting simulator) with a web interface that visualises every phase.
-Across ten benchmarks and five register budgets, all 200 compiled
-programs produce reference-identical output; at $k{=}4$ registers \MG\
-lowers the geometric-mean cycle count by 20.5\% relative to linear scan,
-6.4\% relative to loop-depth priority and 2.5\% relative to the same
-engine driven by static branch priors, and cuts dynamic spill traffic
-by 59\% relative to linear scan.
-Future work will add live-range splitting to the MDP and evaluate the
-allocator inside a production back end on standard suites.
-\end{abstract}
-
-\begin{IEEEkeywords}
-Compiler design, game theory, Markov decision process,
-profile-guided optimization, register allocation, static single assignment
-\end{IEEEkeywords}
-
-%% =====================================================================
 \section{Introduction}
 \label{sec:intro}
 
-Compilers are the bridge between the abstractions programmers write and
+\PARstart{C}{ompilers} are the bridge between the abstractions programmers write and
 the narrow interface that hardware executes. Their structure has been
 stable for decades (a front end that recognises and checks the
 language, a middle end that transforms a machine-independent
@@ -180,8 +178,11 @@ Existing allocators fall broadly into three families. Graph-colouring
 allocators, descending from Chaitin~\cite{chaitin1982} and the
 priority-based variant of Chow and Hennessy~\cite{chow1990}, build an
 interference graph and colour it with $k$ colours, choosing spill
-candidates by a cost that weights each access by $10^{d}$ for loop depth
-$d$. Linear-scan allocators~\cite{poletto1999} trade quality for speed
+candidates by a cost that weights each access by an execution-frequency
+estimate: classically $10^{d}$ for loop depth $d$, and in production
+compilers such as LLVM's greedy allocator the estimated block frequency,
+which reflects measured counts when profile-guided optimisation is
+enabled~\cite{olesen2011greedy,llvmbfi}. Linear-scan allocators~\cite{poletto1999} trade quality for speed
 by sweeping live intervals in program order. On SSA form the
 interference graph is chordal~\cite{hack2006ssa,hack2006ipl}, which makes
 colouring itself polynomial and moves the difficulty entirely into the
@@ -201,11 +202,24 @@ have shown that measured execution profiles yield large gains in code
 layout, and recent work predicts profiles when none are
 available~\cite{rotem2021pgo}.
 
-These families leave a gap. Static spill weights encode a fixed belief
-about branch behaviour (loops iterate about ten times; both arms of a
-conditional are equally likely), so they mis-rank values precisely on
-programs with data-dependent control flow, as early studies of static
-estimators already observed~\cite{wagner1994,wu1994}. Learned policies
+These families leave a gap. Spill weights built from static estimates
+encode a fixed belief about branch behaviour (loops iterate about ten
+times; both arms of a conditional are equally likely), so they mis-rank
+values precisely on programs with data-dependent control flow, as early
+studies of static estimators already observed~\cite{wagner1994,wu1994,wall1991}.
+When a profile is available, production compilers already scale spill
+costs by measured block frequencies~\cite{olesen2011greedy,llvmbfi},
+and frequency-weighted spill costs go back to hierarchical and
+progressive allocators~\cite{callahan1991,koes2006}. Such
+profile-weighted costs remove the fixed belief, but they still rank a
+value by a frequency-weighted count of its accesses: they do not model
+the value's residency over its live range (where a spill or reload
+would occur, what calls cost, which loads the peephole pass forwards),
+they do not make loop-carried $\varphi$-webs bid as one, and the
+heuristic that applies them (simplify, spill, evict) leaves the
+objective implicit. Whether modelling these effects is worth more than
+simply weighting accesses by measured frequency is an empirical
+question that this paper tests directly. Learned policies
 avoid fixed beliefs, but they require large training corpora and
 expensive training loops~\cite{sutton2018rl}, and the decision they make
 for a particular value cannot be traced back to a quantity a compiler
@@ -246,13 +260,48 @@ To evaluate it honestly we built a complete compiler around it, from a
 formally specified grammar to a cycle-counting simulator, and a web
 interface that renders every intermediate artefact.
 
+\textit{Contributions.} The main contribution is the \emph{gain
+formulation}: modelling the register residency of each SSA value as a
+two-state MDP over its live range, with measured branch probabilities,
+and using its exact solution, the expected cycles saved per invocation,
+as the quantity that every allocation decision is based on. The
+remaining parts adapt known ideas, and we credit them as such: the
+chordality of SSA interference graphs and maximum cardinality
+search~\cite{hack2006ssa,tarjan1984}, coalescing of $\varphi$-related
+values (here as coalitions that bid together), a capacity-$k$
+sealed-bid auction that is solved by sorting, best-response
+dynamics~\cite{nisan2007agt}, and edge profiling with static
+fallbacks~\cite{wu1994}. A secondary contribution is the evaluation
+vehicle itself: a complete, tested compiler and web interface in which
+every allocator shares the same front end, interference graph and code
+generator, so that differences between allocators are attributable to
+the allocation decision alone.
+
+\textit{Research questions.} The evaluation answers four questions:
+\begin{itemize}
+\item[RQ1] Does profiling help? Is \MG\ with measured probabilities
+better than the same engine driven by static priors?
+\item[RQ2] Does the MDP and auction formulation help beyond profiling?
+Is \MG\ better than simply weighting accesses by profiled block
+frequency, and better than graph colouring with profile-weighted
+spill costs?
+\item[RQ3] How robust are the results to the register budget (up to
+$k=32$), to independently written programs, to several test inputs, to
+the quality of the training profile and to the model constants?
+\item[RQ4] What does it cost at compile time, including the profiling
+run, and how does that cost grow with function size?
+\end{itemize}
+Section~\ref{sec:rq} answers each question explicitly.
+
 The remainder of the paper is organised as follows.
-Section~\ref{sec:related} reviews fifteen recent works and the gaps they
-leave. Section~\ref{sec:proposed} formalises the language, the front
+Section~\ref{sec:related} reviews fifteen recent works, and the
+classical work on frequency-based spill costs, and the gaps they leave. Section~\ref{sec:proposed} formalises the language, the front
 end, the intermediate representations and the optimiser, then develops
 the MDP, the gain, the coalitions and the auction, with the algorithms
 and their properties. Section~\ref{sec:impl} describes the toolchain,
-the parameters and the results on five metrics against three baselines.
+the parameters and the results on five metrics against six baselines,
+followed by the ablations, robustness studies and answers to the
+research questions.
 Section~\ref{sec:conclusion} concludes, and the team's contributions are
 listed after it.
 
@@ -260,9 +309,11 @@ listed after it.
 \section{Related Works}
 \label{sec:related}
 
-We review fifteen works from 2018--2024, grouped by theme. For each we
-summarise the proposed solution, its methodology and tools, the reported
-effectiveness and the research gap relative to \MG.
+We review fifteen works from 2018--2025, grouped by theme, followed by
+the older line of work on frequency-based spill costs that is closest
+to \MG. For each we summarise the proposed solution, its methodology
+and tools, the reported effectiveness and the research gap relative to
+\MG.
 
 \subsection{Combinatorial and survey work on allocation}
 
@@ -385,7 +436,9 @@ integrates profile-driven basic-block layout into the build through
 distributed, incremental relinking with the LLVM toolchain, avoiding
 BOLT's monolithic binary rewrite. It achieved comparable speed-ups with
 much lower memory and build-time cost. \textit{Gap:} as with BOLT, the
-profile does not reach allocation.
+relinker does not revisit register decisions; inside the compiler the
+profile reaches allocation only as block-frequency weights on spill
+costs (Section~\ref{sec:freqrw}).
 
 \textit{Rotem and Cummins}~\cite{rotem2021pgo} predict branch
 probabilities statically so that profile-guided optimisation can run
@@ -406,22 +459,56 @@ learning, hardware design and more. It reduced the cost of building
 domain-specific compilers. \textit{Gap:} MLIR lowers to LLVM's
 allocators and does not change how registers are assigned.
 
-\textit{Cummins et~al.}~\cite{cummins2023llm} train a large language
-model to optimise LLVM assembly for code size. A 7B-parameter
-transformer is trained from scratch to predict pass lists and optimised
-IR, with auxiliary tasks that improve its understanding of the code.
-It outperformed the compiler's built-in pass ordering on held-out
-programs with no extra compilations. \textit{Gap:} its outputs are not
+\textit{Cummins et~al.}~\cite{cummins2025llmcompiler} present LLM
+Compiler, a family of foundation models for compiler optimisation. Code
+models are further trained on a large corpus of LLVM IR and assembly to
+emulate the compiler, then fine-tuned to choose optimisation pass
+lists for code size and to disassemble machine code back into IR. The
+models recover a substantial share of the code-size savings of an
+autotuning search without any additional compilations, and they are
+released for further research. \textit{Gap:} their outputs are not
 guaranteed correct and give no account of the decisions made.
+
+\subsection{Frequency-based spill costs and profile-guided allocation}
+\label{sec:freqrw}
+
+This line of work is the closest to \MG's central idea, and we review
+it separately because it predates the 2018--2025 window.
+\textit{Wall}~\cite{wall1991} compared real and estimated profiles as
+inputs to optimisations including link-time register allocation, and
+found that estimated profiles recover only part of the benefit of
+measured ones. \textit{Callahan and Koblenz}~\cite{callahan1991}
+colour a hierarchy of tiles that follows the program structure and use
+execution-frequency estimates to place spill code in infrequently
+executed tiles. \textit{Briggs et~al.}~\cite{briggs1994} and
+\textit{George and Appel}~\cite{george1996} established optimistic
+colouring and conservative and iterated coalescing, with spill costs
+weighted by estimated frequency, which is the form of graph-colouring
+allocator we use as a baseline. \textit{Lueh et~al.}~\cite{lueh2000}
+allocate regions in order of their execution frequency and fuse them,
+and \textit{Koes and Goldstein}~\cite{koes2006} formulate global
+allocation as a multi-commodity network-flow problem whose costs are
+weighted by expected execution frequency and refine it progressively.
+In LLVM, the greedy allocator computes the spill weight of a live range
+from the block frequencies of its uses and definitions~\cite{olesen2011greedy},
+and those frequencies are derived from profile data when it is
+supplied~\cite{llvmbfi}. \textit{Gap:} in all of these, the profile
+scales an access count; none states, per value, the expected cycles
+that residency saves under a model of spills, reloads, calls and
+forwarding, and none makes loop-carried values bid as a coalition.
+Section~\ref{sec:ablation} tests whether this difference matters by
+comparing \MG\ with a profile-weighted priority allocator and with
+Chaitin--Briggs colouring using profile-weighted spill costs.
 
 \subsection{Summary of gaps}
 
-Across these works, measured execution frequencies drive layout but not
-allocation, learned allocators require heavy training and are opaque,
-and combinatorial allocators optimise static cost models. \MG\
-addresses the intersection: an allocator whose objective is the
-expected saving under measured probabilities, solved exactly and
-cheaply, with every decision explainable as a bid.
+Across these works, measured execution frequencies drive code layout,
+and inside the allocator they enter only as weights on spill costs;
+learned allocators require heavy training and are opaque; and
+combinatorial allocators optimise static cost models. \MG\ addresses
+the intersection: an allocator whose objective is the expected saving
+under measured probabilities, solved exactly and cheaply, with every
+decision explainable as a bid.
 
 %% =====================================================================
 \section{Proposed Work}
@@ -873,7 +960,16 @@ r_\Mem(b) &= -\big(u_v(b)\,\cld + d_v(b)\,\cst + f_v(b)\,\cmv\big),
 \end{equation}
 with $\csv$ a small bonus for a register access, $\cmv$ the cost of a
 forwarded move and an extra $-\cld$ in the definition block of a
-parameter, which arrives in its slot. The optimal values satisfy the
+parameter, which arrives in its slot. The constants are taken from the
+simulator's latency table rather than tuned: $\cld$ and $\cst$ are the
+load and store latencies, $\cmv=1$ is the latency of the register move
+that replaces a forwarded load, and $\csv=1$, one cycle per access,
+is the unit of the latency table. $\csv$ is not a physical cost: it
+keeps the gain of an accessed value strictly positive and ranks values
+with equal spill traffic by how often they are accessed.
+Section~\ref{sec:robust} shows that the results change by at most
+0.4\% when $\csv$ and $\cmv$ are varied over $\{0,0.5,1,2\}$ and
+$\{0,1,2\}$. The optimal values satisfy the
 Bellman equations~\cite{bellman1957,puterman1994}
 \begin{equation}
 \begin{aligned}
@@ -901,6 +997,24 @@ independent cross-check in the test suite. If the restricted chain
 were ever not transient, the solver would fall back to a discount factor
 $\gamma=0.999$.
 
+\textit{Complexity of Algorithm~\ref{alg:gains}.} The block frequencies
+(\ref{eq:freq}) need one sparse solve over the $|B|$ blocks, $O(|B|^3)$
+in the worst case for Gaussian elimination. For a value $v$, every
+policy-iteration round solves (\ref{eq:policyeval}), a system of
+$2|L_v|$ unknowns, which costs $O(|L_v|^3)$ in the worst case and
+$O(|L_v|\,w^2)$ when the system, ordered by reverse postorder, has
+bandwidth $w$; the improvement step is $O(|L_v|)$. With $R_v$ rounds
+and the two forced-policy evaluations, the gains cost
+$O\big(|B|^3+\sum_{v}(R_v+2)\,|L_v|^3\big)$ in the worst case. Howard's
+method needs few rounds in practice (1.3 on average and at most 7 in
+our suites), and coalitions are a union-find pass over the
+$\varphi$-edges. The MCS order is $O(|V|+|A|)$, each auction round sorts
+at most $k+1$ bids, and binding is $O(|V|\,k+|A|)$; best response
+makes at most $2|V|$ moves, each checked in $O(|A|)$, so the auction
+and equilibrium steps are dominated by the gains.
+Section~\ref{sec:cost} measures how the allocation time grows with
+function size and live-range length.
+
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[font=\scriptsize, >=Stealth]
@@ -920,12 +1034,25 @@ Rewards follow (\ref{eq:reward}).}
 
 \subsection{Expected gain of a value}
 
-An auction loser does not choose its policy: it is forced to stay in
-$\Mem$ throughout. Let $V_{\mathrm{mem}}$ be the value of that forced
-policy, obtained from (\ref{eq:policyeval}) with $\pi\equiv$ \emph{stay}.
-The per-entry gain is the difference between entering the live range
-with a register under the optimal policy and entering it without one,
-$g(v)=V^\ast(\mathit{def}(v),\Reg)-V_{\mathrm{mem}}(\mathit{def}(v),\Mem)$.
+Neither outcome of the auction leaves the value free to choose its
+policy. A loser is forced to stay in $\Mem$ throughout; let
+$V_{\mathrm{mem}}$ be the value of that policy, obtained from
+(\ref{eq:policyeval}) with $\pi\equiv$ \emph{stay}. A winner is forced
+to stay in $\Reg$ throughout, because the code generator does not split
+live ranges (Section~\ref{sec:backend}); let $V_{\mathrm{reg}}$ be the
+value of that policy, again from (\ref{eq:policyeval}) with
+$\pi\equiv$ \emph{stay}. The per-entry gain is the difference between
+the two policies that can actually be realised,
+$g(v)=V_{\mathrm{reg}}(\mathit{def}(v),\Reg)-V_{\mathrm{mem}}(\mathit{def}(v),\Mem)$.
+The optimal value $V^\ast$ of (\ref{eq:bellman}) is still computed: it
+bounds the realised gain from above, since always staying in $\Reg$ is
+one admissible policy, it shows in the GUI where a value would rather
+be spilled or reloaded, and it is the quantity a live-range-splitting
+code generator would use. The first draft of this paper bid
+$V^\ast(\mathit{def}(v),\Reg)-V_{\mathrm{mem}}$, which values a policy
+that is never carried out; Section~\ref{sec:robust} shows that on our
+suites the two bids differ by 0.05\% in total and give identical cycle
+counts in 48 of 51 configurations.
 The live range is entered once for each execution of the definition
 block, whose expected count per invocation $\phi$ solves the
 Markov-chain flow equations
@@ -936,7 +1063,7 @@ Markov-chain flow equations
 so the expected register-residency gain of $v$ per invocation is
 \begin{equation}
 G(v)=\phi\big(\mathit{def}(v)\big)\cdot
-\Big(V^\ast\big(\mathit{def}(v),\Reg\big)-V_{\mathrm{mem}}\big(\mathit{def}(v),\Mem\big)\Big).
+\Big(V_{\mathrm{reg}}\big(\mathit{def}(v),\Reg\big)-V_{\mathrm{mem}}\big(\mathit{def}(v),\Mem\big)\Big).
 \label{eq:gain}
 \end{equation}
 Measuring against $V_{\mathrm{mem}}$ rather than against
@@ -965,12 +1092,14 @@ the argument $a$ and result $p$ of a $\varphi$ in block $h$ along edge
 $(b,h)$ only when the edge is \emph{hot}:
 \begin{equation}
 \phi(b)\,P(b,h) \;\ge\; \theta\cdot\max\big\{\phi(\mathit{def}(a)),\ \phi(h)\big\},
-\qquad \theta=0.25 .
+\qquad \theta=0.75 .
 \label{eq:hot}
 \end{equation}
 A loop-carried variable thus forms one coalition around its back edge,
 while a copy made once on loop entry, or on a rare path, does not drag
-a cold value into a hot coalition. Every member of coalition $C$ bids the
+a cold value into a hot coalition. The threshold $\theta$ was chosen on
+a separate tuning suite of five programs that is not used in any
+reported result (Section~\ref{sec:params}). Every member of coalition $C$ bids the
 coalition's total gain,
 \begin{equation}
 \beta(v)=\sum_{w\in C(v)} G(w),
@@ -1054,8 +1183,9 @@ The GUI uses the same colours for auction winners and losers.}
     \STATE $\pi' \leftarrow$ greedy in (\ref{eq:bellman}) w.r.t.\ $V_\pi$
     \STATE \textbf{if} $\pi'=\pi$ \textbf{then break}; $\pi\leftarrow\pi'$
   \UNTIL{false}
-  \STATE $V_{\mathrm{mem}} \leftarrow$ evaluate $\pi\equiv$\,\emph{stay} from $\Mem$
-  \STATE $g\leftarrow V_\pi(\mathit{def}(v),\Reg)-V_{\mathrm{mem}}(\mathit{def}(v),\Mem)$
+  \STATE $V^\ast\leftarrow V_\pi$ \COMMENT{optimal; kept for display and splitting}
+  \STATE $V_{\mathrm{reg}}, V_{\mathrm{mem}} \leftarrow$ evaluate $\pi\equiv$\,\emph{stay} from $\Reg$ and from $\Mem$
+  \STATE $g\leftarrow V_{\mathrm{reg}}(\mathit{def}(v),\Reg)-V_{\mathrm{mem}}(\mathit{def}(v),\Mem)$
   \STATE $G(v)\leftarrow \phi(\mathit{def}(v))\cdot g$ \hfill (\ref{eq:gain})
 \ENDFOR
 \STATE $C \leftarrow$ union-find over $\varphi$ edges satisfying (\ref{eq:hot})
@@ -1117,31 +1247,55 @@ that expected penalty is at least the winners' own gain,
 \end{equation}
 with $c_{(b,h)}$ equal to $\cld$ or $\cst$ depending on the direction of
 the copy, the winners concede and the whole coalition leaves the
-game, after which best response runs again to reuse the freed
+game: it is added to an exclusion set $X$ that every later
+best-response pass skips (Algorithm~\ref{alg:br}, lines 1, 6 and 13),
+so a conceded coalition can never take registers again. Best response
+then runs once more, over the coalitions not in $X$, to reuse the freed
 registers.
 
 \begin{proposition}
-Algorithm~\ref{alg:br} terminates after at most $|V|$ deviations, and
-its result is a pure Nash equilibrium of the coalition game: no spilled
-coalition satisfies (\ref{eq:nash}), and no winning coalition can raise
-its payoff by deviating.
+\label{prop:br}
+Algorithm~\ref{alg:br}, including the repair step, terminates after at
+most $2|V|$ deviations and $|V|$ concessions, and its result is a pure
+Nash equilibrium of the game among the coalitions not in $X$: no
+spilled coalition outside $X$ satisfies (\ref{eq:nash}), and no winning
+coalition can raise its payoff by deviating.
 \end{proposition}
 \begin{proofsketch}
-A deviation moves a whole coalition from memory into registers that
-are free with respect to all of its neighbours, without evicting
-anyone, so the set of allocated values grows strictly; hence at most
-$|V|$ deviations occur. Repair only removes values, and the final
-best-response pass again ends when (\ref{eq:nash}) fails for every
-spilled coalition. A winning coalition already receives its maximal
-payoff $\beta(C)$, and changing to another free register leaves the
-payoff unchanged, so no player has a strictly profitable deviation.
+Let $\Phi(\rho)$ be the number of values that hold a register. In
+\textsc{BestResponse}, a deviation moves a whole coalition from memory
+into registers that are free with respect to all of its neighbours,
+without evicting anyone, so $\Phi$ grows strictly and is bounded by
+$|V|$: the first pass makes at most $|V|$ deviations. The repair step
+is a single pass over the coalitions; it only removes values, each
+coalition is demoted at most once, and every demoted coalition enters
+$X$, so at most $|V|$ values are conceded. The second pass skips $X$,
+so it cannot re-admit a conceded coalition and cannot undo the repair;
+by the same argument on $\Phi$ it makes at most $|V|$ further
+deviations and ends when (\ref{eq:nash}) fails for every spilled
+coalition outside $X$. Coalitions in $X$ have conceded because the
+copy penalty (\ref{eq:repair}) of a split allocation exceeds their
+gain, so they are not players of the final game. A winning coalition
+already receives its maximal payoff $\beta(C)$, and changing to
+another free register leaves the payoff unchanged, so no player has a
+strictly profitable deviation.
 \end{proofsketch}
 
-The equilibrium need not maximise (\ref{eq:objective}) globally, since
-the register game is a congestion game~\cite{rosenthal1973} with many
-equilibria. The auction is what steers the dynamics towards the
-high-gain equilibrium: best response only fills registers that the
-auction left free.
+We describe the game cautiously. Because two interfering values may not
+share a register, it is not a congestion game in Rosenthal's
+sense~\cite{rosenthal1973}: a player's payoff depends on which
+neighbours in the interference graph hold which registers, not on how
+many players use a resource, which makes it closer to the graph-colouring
+games studied by Panagopoulou and Spirakis~\cite{panagopoulou2008}. We
+do not claim an exact potential function~\cite{monderer1996} for the
+general game, in which players could also switch or evict. For the
+restricted dynamics of Algorithm~\ref{alg:br}, which only admit
+deviations from memory into free registers, $\Phi$ above is a potential
+that increases with every move, which is all that the termination
+argument needs. The equilibrium need not maximise
+(\ref{eq:objective}) globally, and such games have many equilibria. The
+auction is what steers the dynamics towards a high-gain equilibrium:
+best response only fills registers that the auction left free.
 
 \begin{algorithm}[t]
 \caption{Best-response dynamics with coalition repair}
@@ -1149,19 +1303,21 @@ auction left free.
 \begin{algorithmic}[1]
 \REQUIRE $\rho$ from Algorithm~\ref{alg:auction}, coalitions $C$, bids $\beta$, gains $G$
 \ENSURE equilibrium allocation $\rho$
-\STATE \textsc{BestResponse}$(\rho)$
+\STATE $X\leftarrow\emptyset$ \COMMENT{coalitions that have left the game}
+\STATE \textsc{BestResponse}$(\rho, X)$
 \FORALL{coalitions $C$ split between registers and memory}
   \IF{(\ref{eq:repair}) holds for $C$}
     \STATE $\rho(w)\leftarrow\bot$ for every $w\in C$
+    \STATE $X\leftarrow X\cup\{C\}$
   \ENDIF
 \ENDFOR
-\STATE \textbf{if} anything was demoted \textbf{then} \textsc{BestResponse}$(\rho)$
+\STATE \textbf{if} $X\neq\emptyset$ \textbf{then} \textsc{BestResponse}$(\rho, X)$
 \RETURN $\rho$
 \item[]
-\item[] \textbf{procedure} \textsc{BestResponse}$(\rho)$
+\item[] \textbf{procedure} \textsc{BestResponse}$(\rho, X)$
 \REPEAT
   \STATE $\mathit{changed}\leftarrow$ false
-  \FORALL{spilled coalitions $C$ by decreasing $\beta$}
+  \FORALL{spilled coalitions $C\notin X$ by decreasing $\beta$}
     \IF{every $v\in C$ has a free register (\ref{eq:nash})}
       \STATE assign them, preferring registers of web partners
       \STATE $\mathit{changed}\leftarrow$ true
@@ -1173,23 +1329,26 @@ auction left free.
 
 \begin{figure*}[!t]
 \centering
-\IfFileExists{gui_allocation.png}{%
-  \includegraphics[width=0.92\textwidth]{gui_allocation.png}%
-}{%
-  \fbox{\parbox[c][60mm][c]{0.9\textwidth}{\centering\small
-  Screenshot of the Allocation view (gui\_allocation.png).}}%
-}
-\caption{The \MG\ Compiler Studio on the rare-branch benchmark at
-$k=4$. Left: the MiniC editor with syntax colouring and diagnostics.
-Right: the Allocation view with the interference graph (one colour per
-register, red dashed outline for spilled values), each value's gain
-$G(v)$, coalition bid, live-range size, policy-iteration rounds and
-register, and the auction rounds in MCS order with winners in green and
-losers in red.}
+\begin{minipage}[t]{0.40\textwidth}\vspace{0pt}\centering
+\includegraphics[width=\linewidth]{c_alloc_table.png}\\[-1pt]
+{\footnotesize (a) Gains $G(v)$, coalition bids, live-range size, policy-iteration rounds and location}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.57\textwidth}\vspace{0pt}\centering
+\includegraphics[width=\linewidth]{c_alloc_stats.png}\\[-1pt]
+{\footnotesize (b) Summary of the allocation of \tm{main}}\\[6pt]
+\includegraphics[width=\linewidth]{c_alloc_rounds.png}\\[-1pt]
+{\footnotesize (c) The first auction rounds in MCS order: winners in green, losers in red}
+\end{minipage}
+\caption{The Allocation view of the \MG\ Compiler Studio on the
+rare-branch benchmark at $k=4$ (training input \tm{7 10}, test input
+\tm{13 10}), cropped to its key panels. The full-window screenshots of
+every view are provided as supplementary material in the repository
+(\tm{docs/screenshots}).}
 \label{fig:gui}
 \end{figure*}
 
 \subsection{Back end: leaving SSA and code generation}
+\label{sec:backend}
 
 Fig.~\ref{fig:allocflow} summarises the allocation flow and its
 hand-off to the back end. The target, PG-RISC, is a load/store RISC with
@@ -1226,43 +1385,35 @@ is the forwarding that $f_v(b)$ in (\ref{eq:reward}) anticipates.
 
 \subsection{Modules and the team's contribution}
 
-The work divides into five modules, each owned by one team member (the
-full list is given in the contributions section). The core pipeline
+The work divides into modules owned by the team members (the full list
+is given in the contributions section). The core pipeline
 module provides the lexer, the grammar and its LL(1) verification, the
 parser and AST, and TAC generation (Shreyans Chowdry). The semantic
 module provides the scoped symbol table, the attribute evaluation and
 diagnostics (Samrender Singh Saini). The optimisation and code-generation
-module provides SSA, the optimiser, the \MG\ allocator and PG-RISC code
+module provides SSA, the optimiser, the \MG\ gain engine and PG-RISC code
 generation (Karthikeya Jami). The runtime and evaluation module provides
 the interpreter, the simulator, the test suite and the benchmark
-harness (Abhishek Kumar). The interface module provides the web GUI,
-the visualisations and the documentation (Nishanth Kumar).
+harness (Abhishek Kumar). The web GUI and its visualisations are part of
+the core pipeline module (Shreyans Chowdry), with documentation and
+interface testing support from Nishanth Kumar. Within the \MG\ allocator
+itself, the work is divided among four members: the profile-derived
+transition matrices, block frequencies and $\varphi$-web coalitions
+(Shreyans Chowdry); the interference graph, MCS order and sealed-bid
+auction (Samrender Singh Saini); the residency MDP, policy iteration and
+gains (Karthikeya Jami); and best response, coalition repair and the
+baselines (Abhishek Kumar).
 
-\newcommand{\guishot}[2]{%
-  \IfFileExists{#1}{\includegraphics[width=\linewidth]{#1}}{%
-  \fbox{\parbox[c][40mm][c]{0.95\linewidth}{\centering\small #2}}}}
 \begin{figure*}[!t]
 \centering
-\begin{minipage}[t]{0.49\textwidth}\centering
-\guishot{gui_pane_tokens.png}{Tokens view}\\[-1pt]
-{\footnotesize (a) Tokens: the DFA's token stream, coloured by kind}
-\end{minipage}\hfill
-\begin{minipage}[t]{0.49\textwidth}\centering
-\guishot{gui_small_ast.png}{AST view}\\[-1pt]
-{\footnotesize (b) AST: declarations, control flow, statements, expressions and leaves}
-\end{minipage}\\[5pt]
-\begin{minipage}[t]{0.49\textwidth}\centering
-\guishot{gui_small_cfg.png}{CFG view}\\[-1pt]
-{\footnotesize (c) CFG: block headers coloured by execution frequency, edges labelled
-$P_{\mathrm{prof}}$ ($P_{\mathrm{stat}}$)}
-\end{minipage}\hfill
-\begin{minipage}[t]{0.49\textwidth}\centering
-\guishot{gui_pane_run.png}{Run \& Metrics view}\\[-1pt]
-{\footnotesize (d) Run \& Metrics: reference output and the four allocators compared}
-\end{minipage}
-\caption{Further views of the \MG\ Compiler Studio. (a) and (d) show
-the rare-branch benchmark; (b) and (c) show the loop of
-Fig.~\ref{fig:tac} compiled with training input 10.}
+\includegraphics[width=0.80\textwidth]{c_tokens.png}\\[-1pt]
+{\footnotesize (a) Tokens view: counts by kind and the token stream of the maximal-munch DFA, coloured by kind}\\[6pt]
+\includegraphics[width=0.80\textwidth]{c_run.png}\\[-1pt]
+{\footnotesize (b) Run \& Metrics view: the four allocators of the GUI compared on the test input}
+\caption{Two further views of the \MG\ Compiler Studio on the
+rare-branch benchmark, cropped so that the text is legible in print.
+The AST and CFG views correspond to Figs.~\ref{fig:ast} and~\ref{fig:cfg};
+full screenshots of all ten views are in the repository.}
 \label{fig:guitabs}
 \end{figure*}
 
@@ -1281,41 +1432,65 @@ graphs, using a colour code that is consistent across views (token
 kinds, AST node categories, one colour per register, red for spills,
 green for auction winners, and a blue-to-red heat scale for block
 frequencies), so that the same colours used in the figures of this
-paper appear on screen. The GUI
-is started with a single start-up script, which launches the server on
-port 8765 and opens the browser, and the benchmark study is run with one
-command-line invocation that writes JSON and CSV results. A
-\texttt{unittest} suite of 23 tests covers the lexer, grammar, parser,
+paper appear on screen. The GUI is started with a single start-up
+script, which launches the server on port 8765 and opens the browser,
+and every experiment in this section is run with one command-line
+invocation that writes JSON results.
+
+A \texttt{unittest} suite of 27 tests covers the lexer, grammar, parser,
 semantic checks, SSA invariants (single assignment and dominance of
 uses), optimiser semantic preservation, chordality, agreement of policy
-and value iteration, a hand-computed gain, auction capacity, the Nash
-property and end-to-end runs of all allocators for $k\in\{2,3,4,6\}$;
-all tests pass. The interface was exercised end to end in headless
+and value iteration, a hand-computed gain, the bound
+$V_{\mathrm{reg}}\le V^\ast$, auction capacity, the Nash property, the
+exclusion of conceded coalitions, feasibility of every baseline, and
+end-to-end runs of all allocators on both benchmark suites; all tests
+pass. Measured with Coverage.py~\cite{coveragepy}, the suite executes
+94\% of the statements of the compiler (97\% of the allocator module),
+excluding only the experiment scripts. The interface was exercised end to end in headless
 Chromium through Playwright~\cite{playwright}, which also produced the
 screenshots in Figs.~\ref{fig:gui} and~\ref{fig:guitabs}.
 
-Each benchmark is compiled at the full optimisation level, profiled on
-a training input and measured on a different test input, for every
-allocator and $k\in\{3,4,5,6,8\}$: 200 configurations. Every simulated
-run is compared with the reference interpreter's output and all 200
-match. Experiments ran on a Linux container with Python~3.13; because
-the simulator counts cycles deterministically, the results do not
-depend on the host.
-
-
-
-
+Each program is compiled at the full optimisation level, profiled on a
+training input and measured on a different test input, for every
+allocator and $k\in\{3,4,5,6,8,16,32\}$. With 17 programs and seven
+allocators this gives 833 configurations, and the multiple-input study
+adds 595 more. Every simulated run is compared with the reference
+interpreter's output and all 1{,}428 match. Experiments ran on a Linux
+container with Python~3.13; because the simulator counts cycles
+deterministically, the results do not depend on the host.
 
 \subsection{Parameters and benchmarks}
+\label{sec:params}
 
 Table~\ref{tab:params} lists the parameters. The cost model matches the
 simulator's latencies, so the gains are expressed in the same cycles
-that are measured. The suite (Table~\ref{tab:bench}) spans straight-line
-code, regular loops, recursion and programs whose control flow depends
-on the data: a rare error branch, an early-exit search, a switch-like
-dispatch chain and a token scanner. Most programs generate their data
-with a linear congruential generator seeded from the input, so training
-and test inputs exercise the same code with different data.
+that are measured. Register budgets now extend to $k=16$ and $k=32$,
+the sizes of realistic RISC register files, to show what happens when
+pressure is low.
+
+Programs come from three disjoint sets. The \emph{original suite} of
+ten kernels (Table~\ref{tab:bench}, top) spans straight-line code,
+regular loops, recursion and programs whose control flow depends on the
+data: a rare error branch, an early-exit search, a switch-like dispatch
+chain and a token scanner. The \emph{independent suite} of seven
+programs (Table~\ref{tab:bench}, bottom) was translated into MiniC from
+well-known embedded benchmarks after the original suite was fixed:
+CRC-32, bit counting, Dijkstra's shortest paths and quicksort after
+MiBench~\cite{guthaus2001mibench}, Levenshtein distance and an FIR
+filter after BEEBS~\cite{pallister2013beebs}, and a 0/1 knapsack.
+MiniC has no bitwise operators, so shifts and XOR are written
+arithmetically. A separate \emph{tuning suite} of five programs (bubble
+sort, prime counting, a histogram with outliers, naive string search and
+a gcd table) is used only to choose the hot-edge threshold $\theta$ and
+appears in no other result. On the tuning suite, at
+$k\in\{3,4,6\}$, the geometric mean of \MG's cycles relative to linear
+scan is 0.803 for $\theta\in\{0.05,0.1,0.25\}$, 0.782 for $\theta=0.5$,
+0.781 for $\theta=0.75$ and 0.850 without coalitions, so $\theta=0.75$
+is used throughout. (The first draft used $\theta=0.25$, chosen on the
+evaluation suite itself.) Most programs generate their data with a
+linear congruential generator seeded from the input, so training and
+test inputs exercise the same code with different data; each program
+has five test inputs, and the first is used unless stated otherwise.
 
 \begin{table}[t]
 \centering
@@ -1326,17 +1501,19 @@ and test inputs exercise the same code with different data.
 \toprule
 Parameter & Value \\
 \midrule
-Register budgets $k$ & 3, 4, 5, 6, 8 \\
+Register budgets $k$ & 3, 4, 5, 6, 8, 16, 32 \\
 Load / store cost $\cld$ / $\cst$ (cycles) & 4 / 2 \\
 Register-access bonus $\csv$, forwarded move $\cmv$ & 1 / 1 \\
 ALU / MUL / DIV latency & 1 / 3 / 12 \\
 Taken / not-taken branch, call / return & 2 / 1, 3 / 3 \\
 Discount $\gamma$ & 1 (fallback 0.999) \\
 Static loop-stay probability & 0.9 \\
-Hot-edge threshold $\theta$ & 0.25 \\
+Hot-edge threshold $\theta$ (tuning suite) & 0.75 \\
+Gain policy & always-in-register (\ref{eq:gain}) \\
 Optimiser rounds (max) & 10 \\
-Interpreter / simulator step limits & $3\cdot10^6$ / $1.2\cdot10^7$ \\
-Training $\neq$ test input & all benchmarks \\
+Interpreter / simulator step limits & $2\cdot10^7$ / $8\cdot10^7$ \\
+Programs: original / independent / tuning & 10 / 7 / 5 \\
+Test inputs per program & 5 (training $\neq$ test) \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1344,155 +1521,237 @@ Training $\neq$ test input & all benchmarks \\
 \begin{table}[t]
 \centering
 \caption{Benchmarks: SSA values, $\varphi$s, largest interference
-clique $\omega$, mean and maximum policy-iteration rounds, and time
-to run all four allocators ($k=4$)}
+clique $\omega$, mean and maximum policy-iteration rounds, profiling
+time (interpreter on the training input) and \MG\ allocation time
+($k=4$). Top: original suite; bottom: independent suite}
 \label{tab:bench}
 \footnotesize
-\setlength{\tabcolsep}{3.5pt}
-\begin{tabular}{@{}lrrrrrr@{}}
+\setlength{\tabcolsep}{3.2pt}
+\begin{tabular}{@{}lrrrrrrr@{}}
 \toprule
-Benchmark & $|V|$ & $\varphi$ & $\omega$ & PI$_{\text{mean}}$ & PI$_{\max}$ & ms \\
+Benchmark & $|V|$ & $\varphi$ & $\omega$ & PI$_{\text{mean}}$ & PI$_{\max}$ & prof.\,ms & alloc.\,ms \\
 \midrule
-straightline & 39 & 0 & 11 & 1.00 & 1 & 2.6 \\
-arraysum & 38 & 16 & 9 & 1.29 & 3 & 6.2 \\
-matmul & 51 & 10 & 8 & 1.27 & 3 & 5.9 \\
-recursion & 39 & 4 & 7 & 1.28 & 3 & 4.4 \\
-rarebranch & 62 & 30 & 12 & 1.26 & 3 & 9.4 \\
-earlyexit & 41 & 17 & 10 & 1.29 & 3 & 8.0 \\
-dispatch & 116 & 55 & 15 & 1.17 & 7 & 21.7 \\
-scanner & 89 & 49 & 11 & 1.15 & 4 & 19.8 \\
-sort & 53 & 16 & 10 & 1.32 & 3 & 11.9 \\
-collatz & 30 & 16 & 9 & 1.53 & 3 & 9.6 \\
+straightline & 39 & 0 & 11 & 1.00 & 1 & 0 & 1.2 \\
+arraysum & 38 & 16 & 9 & 1.29 & 3 & 67 & 2.9 \\
+matmul & 51 & 10 & 8 & 1.27 & 3 & 116 & 2.9 \\
+recursion & 39 & 4 & 7 & 1.28 & 3 & 22 & 2.3 \\
+rarebranch & 62 & 30 & 12 & 1.26 & 3 & 73 & 9.2 \\
+earlyexit & 41 & 17 & 10 & 1.29 & 3 & 112 & 4.1 \\
+dispatch & 116 & 55 & 15 & 1.17 & 7 & 45 & 16.2 \\
+scanner & 89 & 49 & 11 & 1.15 & 4 & 88 & 11.3 \\
+sort & 53 & 16 & 10 & 1.32 & 3 & 211 & 4.4 \\
+collatz & 30 & 16 & 9 & 1.53 & 3 & 181 & 5.6 \\
+\midrule
+crc & 50 & 20 & 13 & 1.38 & 6 & 506 & 7.2 \\
+bitcount & 52 & 18 & 10 & 1.44 & 11 & 114 & 8.6 \\
+dijkstra & 61 & 19 & 11 & 1.41 & 6 & 469 & 10.5 \\
+levenshtein & 65 & 16 & 14 & 1.29 & 6 & 723 & 18.9 \\
+knapsack & 48 & 8 & 8 & 1.15 & 2 & 342 & 2.9 \\
+fir & 60 & 21 & 11 & 1.23 & 3 & 354 & 5.3 \\
+qsort & 72 & 15 & 8 & 1.57 & 10 & 48 & 14.6 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\begin{figure*}[!t]
-\centering
-\begin{tikzpicture}
-\begin{axis}[
-  ybar, bar width=4.2pt, width=0.98\textwidth, height=48mm,
-  ymin=0.5, ymax=1.06, ylabel={cycles / linear scan},
-  symbolic x coords={straightline,arraysum,matmul,recursion,rarebranch,earlyexit,dispatch,scanner,sort,collatz},
-  xtick=data, x tick label style={font=\scriptsize, text height=1.6ex, text depth=0.3ex},
-  y tick label style={font=\scriptsize}, ylabel style={font=\scriptsize},
-  legend style={font=\scriptsize, at={(0.5,1.02)}, anchor=south, legend columns=3, draw=none},
-  ymajorgrids, grid style={draw=rule!80}, enlarge x limits=0.06,
-  extra y ticks={1}, extra y tick style={grid=major, grid style={draw=cLS, dashed, line width=0.8pt}},
-]
-\addplot[fill=cPG, draw=cPG!70!black] coordinates {(straightline,1.014) (arraysum,0.903) (matmul,0.692) (recursion,1.001) (rarebranch,0.655) (earlyexit,0.962) (dispatch,0.542) (scanner,0.777) (sort,0.860) (collatz,0.695)};
-\addplot[fill=cSP, draw=cSP!70!black] coordinates {(straightline,1.014) (arraysum,0.986) (matmul,0.692) (recursion,1.000) (rarebranch,0.757) (earlyexit,0.965) (dispatch,0.544) (scanner,0.787) (sort,0.860) (collatz,0.695)};
-\addplot[fill=cLD, draw=cLD!70!black] coordinates {(straightline,1.014) (arraysum,0.986) (matmul,0.692) (recursion,1.002) (rarebranch,0.819) (earlyexit,0.946) (dispatch,0.696) (scanner,0.875) (sort,0.863) (collatz,0.693)};
-\legend{\MG\ (profiled), Static-Prior \MG, Loop-depth priority}
-\end{axis}
-\end{tikzpicture}
-\caption{Simulated cycles at $k=4$ on the test inputs, normalised to
-linear scan (dashed grey line, 1.0). Lower is better. Colours match the
-allocator colours used in the GUI's Run \& Metrics view.}
-\label{fig:cycles}
-\end{figure*}
-
 \subsection{Baselines and metrics}
 
-We compare four allocators that share the front end, optimiser,
-interference graph and code generator:
-(i)~\MG\ with profiled probabilities;
-(ii)~\emph{Static-Prior} \MG, the same engine with (\ref{eq:pstat});
-(iii)~\emph{Loop-depth priority}, in the style of Chow and
+We compare seven allocators that share the front end, optimiser,
+interference graph and code generator, so that only the allocation
+decision differs:
+(i)~\MG\ (PG) with profiled probabilities;
+(ii)~\emph{Static-Prior} \MG\ (SP), the same engine with (\ref{eq:pstat});
+(iii)~\emph{Profiled-frequency priority} (FP), an ablation that keeps
+\MG's coalitions, auction, binding and best response but replaces the
+MDP gain by the access count weighted by the profiled block frequency
+$\phi$ of (\ref{eq:freq}), i.e.\ the 10$^{\text{depth}}$ weight of
+(iv) replaced by measured frequency;
+(iv)~\emph{Loop-depth priority} (LD), in the style of Chow and
 Hennessy~\cite{chow1990}, which weights each access by $10^{\text{depth}}$
-and runs the same auction and binding; and
-(iv)~\emph{Linear scan}~\cite{poletto1999} over live intervals in layout
-order, with register hints for $\varphi$ partners.
-The proposal's comparison with LLVM's native allocator was replaced by
-(iii) and (iv) because PG-RISC is not an LLVM target; this keeps every
-other factor identical.
+and runs the same auction and binding;
+(v)~\emph{Chaitin--Briggs with profiled spill costs}
+(CBp)~\cite{chaitin1982,briggs1994}: conservative (Briggs) coalescing of
+$\varphi$-related values, simplification with optimistic spilling by
+lowest cost/degree, and biased colouring towards $\varphi$ partners,
+with spill costs (loads, stores and forwarded moves) weighted by the
+profiled block frequency, which is how a production allocator uses a
+profile~\cite{olesen2011greedy};
+(vi)~\emph{Chaitin--Briggs with static costs} (CB), the same with
+$10^{\text{depth}}$ weights; and
+(vii)~\emph{Linear scan} (LS)~\cite{poletto1999} over live intervals in
+layout order, with register hints for $\varphi$ partners.
+FP and CBp answer the question whether \MG's gains are worth more than
+simply weighting accesses by measured frequency; SP answers whether the
+profile is worth anything. PG-RISC is not an LLVM target, so LLVM's own
+allocators are represented by these re-implementations rather than run
+directly; this keeps every other factor identical.
 
 We report five metrics: (1)~simulated \emph{cycles} on the test input;
 (2)~dynamic \emph{spill memory operations}, the loads and stores of
 spill slots executed; (3)~\emph{register utilisation},
 $1-\text{spill memops}/\text{value accesses}$, the fraction of operand
 accesses served from registers; (4)~static \emph{code size} in
-instructions, together with the number of spilled values; and
-(5)~\emph{compile cost}, the policy-iteration rounds and allocation
-time of Table~\ref{tab:bench}.
+instructions; and (5)~\emph{compile cost}, separated into the profiling
+run and the allocation itself (Table~\ref{tab:bench} and
+Section~\ref{sec:cost}).
 
 \subsection{Execution time}
 
-Fig.~\ref{fig:cycles} shows cycles at $k=4$, normalised to linear scan.
-\MG\ is fastest or tied on six of ten programs and never more than
-1.7\% behind the best allocator. The largest gains are on programs with
-skewed, data-dependent branches: on rare-branch \MG\ needs 34.5\% fewer
-cycles than linear scan and 13.4\% fewer than Static-Prior, because the
-static prior treats the error path as a coin flip and spends registers
-on error counters, while the profile assigns them to the values of the
-hot path (Fig.~\ref{fig:cfg}). Dispatch shows the largest difference
-from loop-depth priority (22\%), because every case of the dispatch
-chain sits at the same depth and depth weighting cannot tell the common
-cases from the rare ones. On regular loops (matmul, sort, collatz) the
-profile and the static prior agree, and \MG\ coincides with
-Static-Prior. Straight-line code favours linear scan by 1.4\%: with a
-single block there is no uncertainty to exploit, and linear scan's
-interval order happens to fit that block slightly better.
+Table~\ref{tab:k4} lists cycles at $k=4$ for all programs and
+allocators, and Fig.~\ref{fig:cycles} shows the four profile-aware or
+profile-ablated allocators normalised to linear scan. \MG\ is fastest or
+tied on 13 of the 17 programs, and its geometric mean is 21.8\% below
+linear scan, 2.6\% below Static-Prior, 3.3\% below profiled-frequency
+priority, 3.7\% below Chaitin--Briggs with profiled costs and 5.2\%
+below loop-depth priority. The largest gains are on programs with
+skewed, data-dependent branches. On rare-branch, \MG\ needs 5.5\% fewer
+cycles than Static-Prior, 11.7\% fewer than profiled-frequency priority
+and 3.8\% fewer than profiled Chaitin--Briggs, because only the MDP
+charges the error-path counters for what they actually cost: the
+frequency weight alone still lets the error path's several accesses
+add up to a competitive bid. On the independent suite the pattern
+repeats: Dijkstra (13\% below FP and 15\% below CBp), knapsack (9\%)
+and the FIR filter (2--8\%) favour \MG. \MG\ is not uniformly best.
+On quicksort, \MG\ is 4.6\% slower than profiled-frequency priority
+and 3.6\% slower than Static-Prior: the recursive partition loop has a phase
+behaviour that average-case probabilities blur. On Levenshtein,
+loop-depth priority is 0.3\% faster, and Static-Prior is 31\% slower
+because the static prior sees the match/mismatch branch as a fair coin.
+Straight-line code favours linear scan by 1.4\%: with a single block
+there is no uncertainty to exploit.
 
+\begin{table*}[!t]
+\centering
+\caption{Cycles ($\times10^3$) on the primary test input at $k=4$. Bold: best.
+PG: \MG; SP: Static-Prior \MG; FP: profiled-frequency priority; LD:
+loop-depth priority; CBp / CB: Chaitin--Briggs with profiled / static
+spill costs; LS: linear scan. Top: original suite; bottom: independent
+suite}
+\label{tab:k4}
+\footnotesize
+\begin{tabular}{@{}lrrrrrrr@{}}
+\toprule
+Benchmark & PG & SP & FP & LD & CBp & CB & LS \\
+\midrule
+straightline & 0.286 & 0.286 & 0.286 & 0.286 & 0.286 & 0.286 & \textbf{0.282} \\
+arraysum & \textbf{311.4} & \textbf{311.4} & \textbf{311.4} & \textbf{311.4} & 315.4 & 315.4 & 344.8 \\
+matmul & \textbf{565.5} & \textbf{565.5} & \textbf{565.5} & \textbf{565.5} & 583.7 & 583.7 & 817.8 \\
+recursion & \textbf{201.6} & \textbf{201.6} & 202.1 & 202.1 & 202.2 & 202.2 & 201.7 \\
+rarebranch & \textbf{338.4} & 358.2 & 383.2 & 415.0 & 351.7 & 424.8 & 516.4 \\
+earlyexit & 650.6 & \textbf{650.4} & 651.5 & 652.1 & 652.0 & 652.0 & 676.2 \\
+dispatch & \textbf{138.8} & \textbf{138.8} & 153.2 & 171.7 & 140.1 & 156.4 & 236.4 \\
+scanner & \textbf{411.1} & 479.0 & 431.0 & 480.8 & 474.9 & 516.5 & 530.7 \\
+sort & \textbf{849.5} & \textbf{849.5} & 868.8 & 868.8 & 894.4 & 894.4 & 988.4 \\
+collatz & \textbf{655.3} & \textbf{655.3} & 657.2 & 657.2 & 657.2 & 657.2 & 942.2 \\
+\midrule
+crc & \textbf{4009.3} & \textbf{4009.3} & 4026.5 & 4026.5 & 4036.5 & 4036.5 & 4826.2 \\
+bitcount & \textbf{629.7} & \textbf{629.7} & 633.2 & 632.9 & 632.1 & 632.1 & 716.8 \\
+dijkstra & \textbf{1242.1} & \textbf{1242.1} & 1429.3 & 1474.0 & 1456.3 & 1474.0 & 1661.9 \\
+levenshtein & 2721.6 & 3567.6 & 2862.3 & \textbf{2714.2} & 2717.9 & 2717.9 & 3673.8 \\
+knapsack & \textbf{734.7} & \textbf{734.7} & 805.1 & 805.1 & 805.2 & 805.2 & 966.5 \\
+fir & \textbf{1155.2} & 1167.5 & 1179.7 & 1179.8 & 1249.5 & 1249.5 & 1895.6 \\
+qsort & 219.9 & 212.3 & \textbf{210.2} & 223.4 & 222.8 & 219.2 & 293.8 \\
+\midrule
+geo-mean / LS & 0.782 & 0.803 & 0.808 & 0.825 & 0.812 & 0.830 & 1.000 \\
+\bottomrule
+\end{tabular}
+\end{table*}
 
+\begin{figure*}[!t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  ybar, bar width=3.3pt, width=0.98\textwidth, height=50mm,
+  ymin=0.5, ymax=1.08, ylabel={cycles / linear scan},
+  symbolic x coords={straightline,arraysum,matmul,recursion,rarebranch,earlyexit,dispatch,scanner,sort,collatz,crc,bitcount,dijkstra,levenshtein,knapsack,fir,qsort},
+  xtick=data, x tick label style={font=\scriptsize, rotate=30, anchor=north east, text height=1.6ex, text depth=0.3ex},
+  y tick label style={font=\scriptsize}, ylabel style={font=\scriptsize},
+  legend style={font=\scriptsize, at={(0.5,1.02)}, anchor=south, legend columns=4, draw=none},
+  ymajorgrids, grid style={draw=rule!80}, enlarge x limits=0.04,
+  extra y ticks={1}, extra y tick style={grid=major, grid style={draw=cLS, dashed, line width=0.8pt}},
+]
+\addplot[fill=cPG, draw=cPG!70!black] coordinates {(straightline,1.014) (arraysum,0.903) (matmul,0.692) (recursion,1.000) (rarebranch,0.655) (earlyexit,0.962) (dispatch,0.587) (scanner,0.775) (sort,0.860) (collatz,0.695) (crc,0.831) (bitcount,0.878) (dijkstra,0.747) (levenshtein,0.741) (knapsack,0.760) (fir,0.609) (qsort,0.748)};
+\addplot[fill=cSP, draw=cSP!70!black] coordinates {(straightline,1.014) (arraysum,0.903) (matmul,0.692) (recursion,1.000) (rarebranch,0.694) (earlyexit,0.962) (dispatch,0.587) (scanner,0.903) (sort,0.860) (collatz,0.695) (crc,0.831) (bitcount,0.878) (dijkstra,0.747) (levenshtein,0.971) (knapsack,0.760) (fir,0.616) (qsort,0.722)};
+\addplot[fill=cFP, draw=cFP!70!black] coordinates {(straightline,1.014) (arraysum,0.903) (matmul,0.692) (recursion,1.002) (rarebranch,0.742) (earlyexit,0.963) (dispatch,0.648) (scanner,0.812) (sort,0.879) (collatz,0.697) (crc,0.834) (bitcount,0.883) (dijkstra,0.860) (levenshtein,0.779) (knapsack,0.833) (fir,0.622) (qsort,0.715)};
+\addplot[fill=cCBp, draw=cCBp!70!black] coordinates {(straightline,1.014) (arraysum,0.915) (matmul,0.714) (recursion,1.003) (rarebranch,0.681) (earlyexit,0.964) (dispatch,0.593) (scanner,0.895) (sort,0.905) (collatz,0.697) (crc,0.836) (bitcount,0.882) (dijkstra,0.876) (levenshtein,0.740) (knapsack,0.833) (fir,0.659) (qsort,0.758)};
+\legend{\MG\ (profiled), Static-Prior \MG, Profiled-frequency priority, Chaitin--Briggs (profiled costs)}
+\end{axis}
+\end{tikzpicture}
+\caption{Simulated cycles at $k=4$ on the test inputs, normalised to
+linear scan (dashed grey line, 1.0); lower is better. The first ten
+programs are the original suite, the last seven the independent suite.
+The \MG\ colours match the GUI's Run \& Metrics view.}
+\label{fig:cycles}
+\end{figure*}
+
+Across register budgets (Table~\ref{tab:gm} and Fig.~\ref{fig:ksweep})
+\MG\ has the lowest geometric-mean cycle count at every $k\le 8$:
+19--22\% below linear scan, 1.1--3.1\% below Static-Prior, 3.3--4.8\%
+below profiled-frequency priority, 1.2--4.5\% below profiled
+Chaitin--Briggs and 4.8--6.4\% below loop-depth priority. The advantage
+holds on both suites separately: at $k=4$ it is 2.9\% over FP and 2.9\%
+over CBp on the original suite, and 3.8\% and 4.9\% on the independent
+suite. It is not uniform, however. At $k=3$, profiled Chaitin--Briggs
+is 20.7\% faster on matmul and about 12\% faster on Levenshtein and the
+FIR filter: under extreme pressure the auction decides each clique
+greedily in MCS order and keeps coalitions whole, whereas optimistic
+colouring with coalescing finds a tighter packing. These are the cases
+where \MG\ is beaten by more than 5\%.
+
+At $k=16$ and $k=32$ register pressure disappears: no auction-based
+allocator spills at all, so \MG, Static-Prior and both priority
+allocators produce identical code. Chaitin--Briggs is 0.3\% faster
+there, because its coalescing removes a few $\varphi$ copies that
+\MG's binding hints leave, while \MG\ still needs 16\% and 11\% fewer
+cycles than linear scan, which spills at interval boundaries. The benefit of \MG\
+therefore lies in the range where registers are scarce, which on real
+RISC targets corresponds to code with high register pressure (large
+loop bodies, unrolled or inlined code) rather than to typical small
+functions. Results are not strictly monotonic in $k$ for every
+program, because each extra register that holds a value across a call
+adds caller-save traffic.
 
 \begin{table}[t]
 \centering
-\caption{Cycles (thousands) and dynamic spill memory operations at $k=4$}
-\label{tab:k4}
+\caption{Geometric-mean cycles over all 17 programs, relative to linear
+scan, by register budget. Bold: best}
+\label{tab:gm}
 \footnotesize
-\setlength{\tabcolsep}{2.6pt}
-\begin{tabular}{@{}lrrrr@{\hspace{6pt}}rrrr@{}}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrrrrrr@{}}
 \toprule
-& \multicolumn{4}{c}{Cycles ($\times10^3$)} & \multicolumn{4}{c}{Spill memops} \\
-\cmidrule(lr){2-5}\cmidrule(l){6-9}
-Bench. & MG & SP & LD & LS & MG & SP & LD & LS \\
+$k$ & PG & SP & FP & LD & CBp & CB & LS \\
 \midrule
-straight. & 0.29 & 0.29 & 0.29 & \textbf{0.28} & 54 & 54 & 54 & \textbf{45} \\
-arraysum & \textbf{311} & 340 & 340 & 345 & \textbf{24.7k} & 36.9k & 36.9k & 32.8k \\
-matmul & \textbf{566} & \textbf{566} & \textbf{566} & 818 & \textbf{54.3k} & \textbf{54.3k} & \textbf{54.3k} & 121k \\
-recursion & 202 & \textbf{202} & 202 & 202 & 181 & 221 & \textbf{179} & 1343 \\
-rarebr. & \textbf{338} & 391 & 423 & 516 & \textbf{28.8k} & 44.9k & 53.0k & 82.9k \\
-earlyexit & 651 & 652 & \textbf{640} & 676 & 25.0k & 25.2k & \textbf{25.0k} & 25.2k \\
-dispatch & \textbf{128} & 129 & 165 & 236 & \textbf{6.4k} & \textbf{6.4k} & 17.1k & 38.8k \\
-scanner & \textbf{412} & 418 & 464 & 531 & \textbf{5.3k} & 6.0k & 21.2k & 54.4k \\
-sort & \textbf{850} & \textbf{850} & 853 & 988 & 71.6k & 71.6k & \textbf{69.5k} & 101k \\
-collatz & 655 & 655 & \textbf{653} & 942 & 4.8k & 4.8k & \textbf{4.1k} & 76.6k \\
+3 & \textbf{0.795} & 0.821 & 0.824 & 0.846 & 0.804 & 0.824 & 1.000 \\
+4 & \textbf{0.782} & 0.803 & 0.808 & 0.825 & 0.812 & 0.830 & 1.000 \\
+5 & \textbf{0.804} & 0.813 & 0.836 & 0.852 & 0.842 & 0.853 & 1.000 \\
+6 & \textbf{0.805} & 0.820 & 0.846 & 0.861 & 0.842 & 0.852 & 1.000 \\
+8 & \textbf{0.807} & 0.819 & 0.842 & 0.848 & 0.837 & 0.841 & 1.000 \\
+16 & 0.843 & 0.843 & 0.843 & 0.843 & \textbf{0.841} & \textbf{0.841} & 1.000 \\
+32 & 0.891 & 0.891 & 0.891 & 0.891 & \textbf{0.888} & \textbf{0.888} & 1.000 \\
 \bottomrule
-\end{tabular}\\[2pt]
-{\scriptsize MG: \MG; SP: Static-Prior; LD: loop-depth; LS: linear scan. Bold: best.}
+\end{tabular}
 \end{table}
-
-Across register budgets (Fig.~\ref{fig:ksweep}) \MG\ has the lowest
-geometric-mean cycle count at every $k$, 19--22\% below linear scan,
-2.5--5.0\% below Static-Prior and 6.3--7.9\% below loop-depth priority.
-Its advantage over Static-Prior is concentrated in the data-dependent
-benchmarks and is not uniform: on scanner at $k=5$ and dispatch at
-$k=6$ the profiled variant is 4.3\% and 2.1\% slower, because a value
-that is cold on average but hot in a short phase is under-rated by
-average-case probabilities; loop-depth priority is up to 2\% faster
-on earlyexit at $k=4,5$ and slightly faster on matmul at $k=5,6$. Results are not strictly monotonic in $k$
-for every program, because each extra register that holds a value
-across a call adds caller-save traffic.
 
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}
-\begin{axis}[
-  width=\columnwidth, height=46mm, xlabel={registers $k$},
-  ylabel={geo-mean cycles / LS}, xtick={3,4,5,6,8},
-  ymin=0.76, ymax=1.02, legend style={font=\scriptsize, at={(0.5,1.03)}, anchor=south, legend columns=4, draw=none},
+\begin{semilogxaxis}[
+  width=\columnwidth, height=50mm, xlabel={registers $k$ (log scale)},
+  ylabel={geo-mean cycles / LS}, xtick={3,4,5,6,8,16,32}, xticklabels={3,4,5,6,8,16,32},
+  ymin=0.77, ymax=1.02, legend style={font=\scriptsize, at={(0.5,1.03)}, anchor=south, legend columns=3, draw=none},
   tick label style={font=\scriptsize}, label style={font=\scriptsize},
   ymajorgrids, grid style={draw=rule!80}]
-\addplot[cPG, mark=*, line width=1.1pt] coordinates {(3,0.8128) (4,0.7948) (5,0.8012) (6,0.7929) (8,0.7769)};
-\addplot[cSP, mark=square*, line width=1pt] coordinates {(3,0.8555) (4,0.8149) (5,0.8299) (6,0.8193) (8,0.7974)};
-\addplot[cLD, dashed, mark=triangle*, mark options={solid}, line width=1pt] coordinates {(3,0.8739) (4,0.8495) (5,0.8686) (6,0.8462) (8,0.8439)};
-\addplot[cLS, mark=diamond*, line width=1pt] coordinates {(3,1) (4,1) (5,1) (6,1) (8,1)};
-\legend{\MG, Static-Prior, Loop-depth, Linear scan}
-\end{axis}
+\addplot[cPG, mark=*, line width=1.1pt] coordinates {(3,0.7948) (4,0.7817) (5,0.8044) (6,0.8055) (8,0.8073) (16,0.8430) (32,0.8907)};
+\addplot[cSP, mark=square*, line width=1pt] coordinates {(3,0.8206) (4,0.8029) (5,0.8133) (6,0.8198) (8,0.8187) (16,0.8430) (32,0.8907)};
+\addplot[cFP, mark=pentagon*, line width=1pt] coordinates {(3,0.8244) (4,0.8082) (5,0.8361) (6,0.8462) (8,0.8419) (16,0.8430) (32,0.8907)};
+\addplot[cLD, dashed, mark=triangle*, mark options={solid}, line width=1pt] coordinates {(3,0.8464) (4,0.8247) (5,0.8521) (6,0.8607) (8,0.8478) (16,0.8430) (32,0.8907)};
+\addplot[cCBp, mark=diamond*, line width=1pt] coordinates {(3,0.8041) (4,0.8121) (5,0.8420) (6,0.8416) (8,0.8369) (16,0.8407) (32,0.8882)};
+\addplot[cLS, mark=x, line width=1pt] coordinates {(3,1.0000) (4,1.0000) (5,1.0000) (6,1.0000) (8,1.0000) (16,1.0000) (32,1.0000)};
+\legend{\MG, Static-Prior, Freq.\ priority, Loop-depth, CB (profiled), Linear scan}
+\end{semilogxaxis}
 \end{tikzpicture}
-\caption{Geometric-mean cycles over the suite, normalised to linear
-scan, as the register budget varies.}
+\caption{Geometric-mean cycles over the 17 programs, normalised to
+linear scan, as the register budget varies from 3 to 32.}
 \label{fig:ksweep}
 \end{figure}
 
@@ -1500,37 +1759,41 @@ scan, as the register budget varies.}
 
 Dynamic spill traffic (Fig.~\ref{fig:spills}) is where the
 expected-gain objective shows most directly, because (\ref{eq:gain})
-is precisely the expected spill traffic avoided. Summed over the suite,
-\MG\ executes 59\% fewer spill memory operations than linear scan at
-$k=4$, 12\% fewer than Static-Prior and 21\% fewer than loop-depth
-priority, and at $k=8$ it nearly eliminates spill traffic (4.6k
-operations against 27.9k, 72.2k and 213k). Register utilisation
-(Fig.~\ref{fig:util}) follows: the mean fraction of operand accesses
-served from registers rises from 77\% at $k=3$ to 98\% at $k=8$ for
-\MG, against 69\% to 87\% for linear scan. Note that the number of
-\emph{static} spilled values can be higher for \MG\ than for loop-depth
-priority (191 against 159 at $k=4$): \MG\ deliberately spills many
-cold values in order to keep the few hot ones, which is the intended
-behaviour of a gain-maximising allocator.
+is precisely the expected spill traffic avoided. Summed over the 17
+programs at $k=4$, \MG\ executes 50\% fewer spill memory operations than
+linear scan, 23\% fewer than Static-Prior, 12\% fewer than
+profiled-frequency priority and 15\% fewer than profiled
+Chaitin--Briggs; at $k=8$ it nearly eliminates spill traffic (68k
+operations against 137k, 205k, 172k and 593k). The exception is again
+$k=3$, where profiled Chaitin--Briggs executes 1.5\% fewer spill
+operations than \MG. Register utilisation (Fig.~\ref{fig:util})
+follows: the mean fraction of operand accesses served from registers
+rises from 76\% at $k=3$ to 98\% at $k=8$ for \MG, against 67\% to 91\%
+for linear scan, and reaches 100\% for every allocator except linear
+scan at $k=16$. The number of \emph{static} spilled values can be
+higher for \MG\ than for the priority allocators: \MG\ deliberately
+spills many cold values in order to keep the few hot ones, which is the
+intended behaviour of a gain-maximising allocator.
 
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}
 \begin{semilogyaxis}[
-  width=\columnwidth, height=46mm, xlabel={registers $k$},
+  width=\columnwidth, height=48mm, xlabel={registers $k$},
   ylabel={total spill memops}, xtick={3,4,5,6,8},
-  legend style={font=\scriptsize, at={(0.02,0.03)}, anchor=south west, draw=none, fill=white},
+  legend style={font=\scriptsize, at={(0.02,0.03)}, anchor=south west, draw=none, fill=white, legend columns=2},
   tick label style={font=\scriptsize}, label style={font=\scriptsize},
   ymajorgrids, grid style={draw=rule!80}]
-\addplot[cPG, mark=*, line width=1.1pt] coordinates {(3,426993) (4,220974) (5,121418) (6,65936) (8,4563)};
-\addplot[cSP, mark=square*, line width=1pt] coordinates {(3,525157) (4,250236) (5,160099) (6,124588) (8,27861)};
-\addplot[cLD, dashed, mark=triangle*, mark options={solid}, line width=1pt] coordinates {(3,548327) (4,281272) (5,190539) (6,122987) (8,72155)};
-\addplot[cLS, mark=diamond*, line width=1pt] coordinates {(3,713119) (4,534475) (5,375411) (6,324336) (8,213194)};
-\legend{\MG, Static-Prior, Loop-depth, Linear scan}
+\addplot[cPG, mark=*, line width=1.1pt] coordinates {(3,1915169) (4,1100831) (5,677926) (6,320390) (8,67607)};
+\addplot[cSP, mark=square*, line width=1pt] coordinates {(3,2192760) (4,1427803) (5,698680) (6,381852) (8,137323)};
+\addplot[cFP, mark=pentagon*, line width=1pt] coordinates {(3,1967620) (4,1246262) (5,785645) (6,498035) (8,205271)};
+\addplot[cCBp, mark=diamond*, line width=1pt] coordinates {(3,1887008) (4,1290115) (5,875320) (6,536513) (8,171682)};
+\addplot[cLS, mark=x, line width=1pt] coordinates {(3,2911238) (4,2192849) (5,1488122) (6,934693) (8,592789)};
+\legend{\MG, Static-Prior, Freq.\ priority, CB (profiled), Linear scan}
 \end{semilogyaxis}
 \end{tikzpicture}
-\caption{Dynamic spill loads and stores summed over the suite
-(log scale).}
+\caption{Dynamic spill loads and stores summed over the 17 programs
+(log scale). At $k\ge16$ only linear scan spills.}
 \label{fig:spills}
 \end{figure}
 
@@ -1538,94 +1801,256 @@ behaviour of a gain-maximising allocator.
 \centering
 \begin{tikzpicture}
 \begin{axis}[
-  ybar, bar width=3.6pt, width=\columnwidth, height=44mm,
+  ybar, bar width=2.6pt, width=\columnwidth, height=46mm,
   xlabel={registers $k$}, ylabel={mean register utilisation},
-  symbolic x coords={3,4,5,6,8}, xtick=data, ymin=0.6, ymax=1.0,
-  legend style={font=\scriptsize, at={(0.5,1.03)}, anchor=south, legend columns=4, draw=none},
+  symbolic x coords={3,4,5,6,8,16}, xtick=data, ymin=0.6, ymax=1.02,
+  legend style={font=\scriptsize, at={(0.5,1.03)}, anchor=south, legend columns=3, draw=none},
   tick label style={font=\scriptsize}, label style={font=\scriptsize},
-  ymajorgrids, grid style={draw=rule!80}, enlarge x limits=0.15]
-\addplot[fill=cPG, draw=cPG!70!black] coordinates {(3,0.7722) (4,0.8551) (5,0.9046) (6,0.936) (8,0.9781)};
-\addplot[fill=cSP, draw=cSP!70!black] coordinates {(3,0.7252) (4,0.8383) (5,0.8774) (6,0.8982) (8,0.9607)};
-\addplot[fill=cLD, draw=cLD!70!black] coordinates {(3,0.7102) (4,0.8199) (5,0.8515) (6,0.8909) (8,0.9293)};
-\addplot[fill=cLS, draw=cLS!70!black] coordinates {(3,0.6863) (4,0.7502) (5,0.8082) (6,0.8344) (8,0.8732)};
-\legend{\MG, Static-Prior, Loop-depth, Linear scan}
+  ymajorgrids, grid style={draw=rule!80}, enlarge x limits=0.12]
+\addplot[fill=cPG, draw=cPG!70!black] coordinates {(3,0.7596) (4,0.8500) (5,0.9066) (6,0.9432) (8,0.9788) (16,1.0000)};
+\addplot[fill=cSP, draw=cSP!70!black] coordinates {(3,0.7369) (4,0.8334) (5,0.8949) (6,0.9243) (8,0.9647) (16,1.0000)};
+\addplot[fill=cFP, draw=cFP!70!black] coordinates {(3,0.7471) (4,0.8393) (5,0.8925) (6,0.9241) (8,0.9593) (16,1.0000)};
+\addplot[fill=cCBp, draw=cCBp!70!black] coordinates {(3,0.7729) (4,0.8375) (5,0.8786) (6,0.9161) (8,0.9600) (16,1.0000)};
+\addplot[fill=cLS, draw=cLS!70!black] coordinates {(3,0.6725) (4,0.7573) (5,0.8260) (6,0.8666) (8,0.9084) (16,0.9654)};
+\legend{\MG, Static-Prior, Freq.\ priority, CB (profiled), Linear scan}
 \end{axis}
 \end{tikzpicture}
 \caption{Mean register utilisation (fraction of operand accesses
-served from registers) over the suite.}
+served from registers) over the 17 programs.}
 \label{fig:util}
 \end{figure}
 
 \subsection{Code size and compile cost}
+\label{sec:cost}
 
-Table~\ref{tab:size} gives static code size summed over the suite.
-The three auction-based allocators produce code of similar size,
-9--17\% smaller than linear scan, because shared web slots and register
-hints remove most $\varphi$ copies, and fewer spilled operands need
-explicit loads and stores. Code size is not the objective of \MG, and
-Static-Prior is marginally smaller at $k=4$--6. Compile cost is low
-(Table~\ref{tab:bench}): policy iteration needs 1.26 improvement rounds
-on average over all values and configurations, with a maximum of seven,
-and running all four allocators on the largest program (dispatch, 116 SSA values) takes
-about 22\,ms in pure Python. Every interference graph in the study was
-verified chordal, with the largest clique at 15 values.
+Table~\ref{tab:size} gives static code size summed over the 17
+programs. The auction-based allocators and Chaitin--Briggs produce code
+of similar size, 9--17\% smaller than linear scan, because shared web
+slots, coalescing and register hints remove most $\varphi$ copies, and
+fewer spilled operands need explicit loads and stores. Code size is not
+the objective of \MG; it is smallest at $k=3,4$, Static-Prior is
+marginally smaller at $k=5$--8, and Chaitin--Briggs, whose coalescing
+is more aggressive, is 4\% smaller at $k\ge16$.
 
 \begin{table}[t]
 \centering
-\caption{Static code size (instructions) summed over the suite}
+\caption{Static code size (instructions) summed over the 17 programs}
 \label{tab:size}
 \footnotesize
-\begin{tabular}{@{}lrrrr@{}}
+\setlength{\tabcolsep}{3.4pt}
+\begin{tabular}{@{}lrrrrrrr@{}}
 \toprule
-$k$ & \MG & Static-Prior & Loop-depth & Linear scan \\
+$k$ & PG & SP & FP & LD & CBp & CB & LS \\
 \midrule
-3 & \textbf{1486} & 1496 & 1511 & 1661 \\
-4 & 1443 & \textbf{1433} & 1439 & 1604 \\
-5 & 1395 & \textbf{1385} & 1392 & 1573 \\
-6 & 1351 & \textbf{1341} & 1360 & 1541 \\
-8 & \textbf{1257} & 1260 & 1297 & 1520 \\
+3 & \textbf{2660} & 2662 & 2684 & 2706 & 2677 & 2668 & 2946 \\
+4 & \textbf{2571} & 2585 & 2606 & 2611 & 2574 & 2593 & 2831 \\
+5 & 2491 & \textbf{2484} & 2529 & 2511 & 2501 & 2514 & 2769 \\
+6 & 2418 & \textbf{2402} & 2472 & 2464 & 2453 & 2459 & 2713 \\
+8 & 2308 & \textbf{2303} & 2343 & 2333 & 2309 & 2309 & 2660 \\
+16 & 2180 & 2180 & 2180 & 2180 & \textbf{2097} & \textbf{2097} & 2623 \\
+32 & 2180 & 2180 & 2180 & 2180 & \textbf{2097} & \textbf{2097} & 2567 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Sensitivity to the training input}
+The compile cost of \MG\ has two parts, which Table~\ref{tab:bench}
+reports separately. The \emph{profiling run}, the reference interpreter
+executing the training input, takes 0.1--723\,ms per program and
+dominates the total: summed over the 17 programs it is 27 times the
+allocation time. It runs once per program and training input,
+independently of $k$ and of the allocator, and its cost is that of
+executing the program; in a production setting it is replaced by an
+instrumented or sampled run as in any profile-guided build. The
+\emph{allocation} itself takes 1.2--18.9\,ms per program in pure
+Python. Policy iteration needs 1.29 improvement rounds on average over
+the 966 values of both suites, with a maximum of 11, and every
+interference graph in the study was verified chordal, with the largest
+clique at 15 values.
 
-A profile-driven allocator is only as good as its profile. Table~\ref{tab:sens}
-repeats the three most data-dependent benchmarks at $k=4$ with a
-deliberately unrepresentative training input: on rare-branch the error
-rate in training is 60\% instead of 1\%; on dispatch and scanner the
-training input shifts the case mix. With a mismatched profile \MG\
-falls behind Static-Prior by 2--10\%, though it remains ahead of
-loop-depth priority and linear scan on all three, only narrowly so on
-scanner. The training input must
-therefore resemble production behaviour, as with any profile-guided
+To see how allocation time grows with function size, we generated two
+families of programs (Table~\ref{tab:scale}). In the \emph{wide} family
+a loop updates $m$ accumulators split over two branches, so the number
+of values grows with $m$ while live ranges stay short (at most six
+blocks). \MG's time grows moderately, roughly as $|V|^{1.35}$, from
+6.9\,ms for 37 values to 125\,ms for 906 values, and above about 450
+values it is lower than that of Chaitin--Briggs, whose simplification
+loop is quadratic in our implementation. In the \emph{long} family a loop body
+is a chain of $m$ conditionals, so every accumulator is live across the
+whole body and both $|V|$ and $|L_v|$ grow with $m$. Here the cost of
+the per-value linear systems shows: time grows roughly as
+$(\sum_v|L_v|)^{1.4}$, reaching 2.4\,s for 398 values whose live ranges
+span up to 291 blocks, against 41\,ms for Chaitin--Briggs. Long live
+ranges are therefore \MG's main scalability limit. The systems are
+banded in reverse postorder and their solutions change little between
+policy-iteration rounds, so a banded or incremental solver, or sharing
+one factorisation between values with the same live range, would
+remove most of this cost; we leave this to future work.
+
+\begin{table}[t]
+\centering
+\caption{Allocation time (ms) on generated programs at $k=8$: values
+$|V|$, total and maximum live-range length in blocks}
+\label{tab:scale}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrrrrrr@{}}
+\toprule
+family & $m$ & $|V|$ & $\sum|L_v|$ & $\max|L_v|$ & PG & CBp & LS \\
+\midrule
+wide & 8 & 37 & 80 & 6 & 6.9 & 0.9 & 0.3 \\
+wide & 16 & 66 & 141 & 6 & 4.0 & 1.4 & 0.2 \\
+wide & 32 & 122 & 261 & 6 & 8.2 & 4.2 & 0.4 \\
+wide & 64 & 234 & 501 & 6 & 17.5 & 14.4 & 0.7 \\
+wide & 128 & 458 & 981 & 6 & 39.3 & 52.3 & 1.4 \\
+wide & 256 & 906 & 1941 & 6 & 124.6 & 237.3 & 3.5 \\
+\midrule
+long & 4 & 21 & 110 & 15 & 2.7 & 0.3 & 0.1 \\
+long & 8 & 37 & 310 & 27 & 7.0 & 0.6 & 0.2 \\
+long & 16 & 76 & 1194 & 51 & 31.2 & 2.0 & 0.6 \\
+long & 32 & 142 & 4156 & 99 & 151.5 & 5.9 & 1.5 \\
+long & 64 & 270 & 14684 & 195 & 891.9 & 20.2 & 5.2 \\
+long & 96 & 398 & 31356 & 291 & 2411.8 & 41.2 & 10.5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Ablation: what the MDP adds beyond profiling}
+\label{sec:ablation}
+
+Two comparisons isolate the contributions. Static-Prior uses the MDP,
+coalitions and auction without a profile, so PG versus SP measures the
+\emph{profile}: 1.1--3.1\% at $k\le8$. Profiled-frequency priority uses
+the profile, coalitions, auction and best response but no MDP, so PG
+versus FP measures the \emph{MDP gain} on top of profile-weighted
+access counts: 3.3--4.8\% at $k\le8$, with 12--14\% fewer spill
+operations at $k=4$--5. Profiled Chaitin--Briggs uses the profile in the
+way production compilers do, through frequency-weighted spill costs,
+with a different allocation algorithm; PG versus CBp is 1.2--4.5\% at
+$k\le8$. Since FP and CBp see exactly the same profile as \MG, these
+differences are due to what the MDP models and frequency weighting does
+not: the reload after a spilled definition that the peephole pass
+forwards, the save and restore around calls, and the copy through
+memory when a loop-carried value is split. Where these effects are
+absent, the allocators agree: on straight-line code, arraysum, matmul
+and collatz, PG and FP produce the same code at $k=4$.
+
+\subsection{Robustness}
+\label{sec:robust}
+
+\textit{Several test inputs.} Table~\ref{tab:inputs} repeats the $k=4$
+study with five test inputs per program (85 runs per allocator). The
+geometric means move by at most 0.25\% between inputs and the ranking
+of the allocators never changes; per program, \MG's ratio to linear
+scan varies by at most 2.2 percentage points (dispatch, 0.575--0.598),
+and \MG\ is best or tied in 64 of the 85 runs.
+
+\begin{table}[t]
+\centering
+\caption{Geometric-mean cycles relative to linear scan at $k=4$ over the
+five test inputs: mean, minimum and maximum across inputs}
+\label{tab:inputs}
+\footnotesize
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Allocator & mean & min & max \\
+\midrule
+PG & 0.7821 & 0.7811 & 0.7830 \\
+SP & 0.8032 & 0.8022 & 0.8041 \\
+FP & 0.8084 & 0.8072 & 0.8091 \\
+LD & 0.8245 & 0.8241 & 0.8248 \\
+CBp & 0.8121 & 0.8114 & 0.8127 \\
+CB & 0.8304 & 0.8300 & 0.8309 \\
+LS & 1.0000 & 1.0000 & 1.0000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textit{Quality of the training profile.} A profile-driven allocator is
+only as good as its profile. Fig.~\ref{fig:errsweep} varies the error
+rate of the rare-branch training input from 1\% to 60\% while the test
+input keeps its 1\% error rate. At $k=4$, \MG's allocation is unchanged
+and best of all allocators up to a training error rate of 20\%; at
+30\% it ties Static-Prior (profiled-frequency priority is 3\% faster at
+that point); from 40\% the profile misleads it and it falls
+behind Static-Prior (by 6.8\% at 40\% and 16.9\% at 50--60\%) and, at
+50\%, 0.9\% behind loop-depth priority, while staying ahead of linear scan.
+At $k=8$ the allocation is unchanged up to 40\%. The degradation is
+therefore a step function rather than gradual, because an allocation
+changes only when the ranking of bids changes, and the profile can be
+wrong by a large factor before it does. The training input must still
+resemble production behaviour, as with any profile-guided
 optimisation~\cite{panchenko2019bolt,wagner1994}, and Static-Prior is
 the right fallback when no such input exists.
 
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=\columnwidth, height=46mm, xlabel={error rate in the training input (\%)},
+  ylabel={cycles ($\times10^3$), $k=4$}, xtick={1,10,20,30,40,50,60},
+  ymin=320, ymax=560,
+  legend style={font=\scriptsize, at={(0.02,0.98)}, anchor=north west, draw=none, fill=white, legend columns=2},
+  tick label style={font=\scriptsize}, label style={font=\scriptsize},
+  ymajorgrids, grid style={draw=rule!80}]
+\addplot[cPG, mark=*, line width=1.1pt] coordinates {(1,338.4) (2,338.4) (5,338.4) (10,338.4) (15,338.4) (20,338.4) (30,358.6) (40,382.5) (50,418.7) (60,418.7)};
+\addplot[cSP, mark=square*, line width=1pt] coordinates {(1,358.2) (2,358.2) (5,358.2) (10,358.2) (15,358.2) (20,358.2) (30,358.2) (40,358.2) (50,358.2) (60,358.2)};
+\addplot[cFP, mark=pentagon*, line width=1pt] coordinates {(1,383.2) (2,383.2) (5,383.2) (10,383.2) (15,383.2) (20,383.2) (30,347.0) (40,383.0) (50,406.8) (60,406.8)};
+\addplot[cCBp, mark=diamond*, line width=1pt] coordinates {(1,351.7) (2,351.7) (5,351.7) (10,351.7) (15,351.7) (20,351.7) (30,351.7) (40,424.8) (50,424.8) (60,542.6)};
+\addplot[cLD, dashed, mark=triangle*, mark options={solid}, line width=1pt] coordinates {(1,415.0) (2,415.0) (5,415.0) (10,415.0) (15,415.0) (20,415.0) (30,415.0) (40,415.0) (50,415.0) (60,415.0)};
+\legend{\MG, Static-Prior, Freq.\ priority, CB (profiled), Loop-depth}
+\end{axis}
+\end{tikzpicture}
+\caption{Rare-branch at $k=4$, measured on a test input with a 1\%
+error rate, as the error rate of the training input grows. Linear scan
+(516k cycles) is omitted for clarity.}
+\label{fig:errsweep}
+\end{figure}
+
+\textit{Model constants.} Varying the register-access bonus $\csv$ over
+$\{0,0.5,1,2\}$ and the forwarded-move cost $\cmv$ over $\{0,1,2\}$
+changes \MG's geometric mean at $k=4$ only between 0.780 and 0.783
+(Table~\ref{tab:costs}) and leaves it unchanged at $k=8$, so the
+conclusions do not depend on these constants.
+
 \begin{table}[t]
 \centering
-\caption{Cycles ($\times10^3$, $k=4$) with representative and
-mismatched training inputs}
-\label{tab:sens}
+\caption{\MG's geometric-mean cycles relative to linear scan at $k=4$
+for different model constants}
+\label{tab:costs}
 \footnotesize
-\setlength{\tabcolsep}{3.5pt}
-\begin{tabular}{@{}lrrrrr@{}}
+\begin{tabular}{@{}lrrr@{}}
 \toprule
-& \multicolumn{2}{c}{\MG} & & & \\
-\cmidrule(lr){2-3}
-Benchmark & repr. & mism. & Static & Loop-d. & Lin.\ scan \\
+$\csv$ & $\cmv=0$ & $\cmv=1$ & $\cmv=2$ \\
 \midrule
-rarebranch & \textbf{338.4} & 398.4 & 390.7 & 423.2 & 516.4 \\
-dispatch & \textbf{128.1} & 136.7 & 128.6 & 164.6 & 236.4 \\
-scanner & \textbf{412.3} & 459.9 & 417.8 & 464.2 & 530.7 \\
+0 & 0.7801 & 0.7803 & 0.7809 \\
+0.5 & 0.7803 & 0.7817 & 0.7830 \\
+1 & 0.7803 & 0.7817 & 0.7830 \\
+2 & 0.7817 & 0.7830 & 0.7830 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
+\textit{Realised versus optimal gain.} Over the 966 values of both
+suites, the optimal policy $V^\ast$ would spill or reload inside the
+live range for 189 values (20\%), but the realised gain
+(\ref{eq:gain}) differs from the optimal-policy gain by only 0.05\% in
+total, and by more than 1\% for 9 of the 809 values whose gain exceeds
+one cycle. Bidding with either gain gives identical cycle counts in 48
+of 51 configurations ($k\in\{3,4,8\}$) and at most 0.5\% difference in
+the others. The bid of the first draft was therefore nearly harmless on
+these programs, but the realised gain is the correct quantity and is
+used throughout this version.
+
+\textit{Coalition repair.} Concessions happen in practice: across the
+119 configurations of the main study, 105 values conceded their
+registers in the repair step, and the exclusion set of
+Algorithm~\ref{alg:br} kept every one of them out of the second
+best-response pass.
+
 \subsection{Comparison with related approaches}
 
-Table~\ref{tab:compare} positions \MG\ against the classical
-allocators it was measured against and against the learned allocator
+Table~\ref{tab:compare} positions \MG\ against the allocators it was
+measured against and against the learned allocator
 RL4ReAl~\cite{venkatakeerthy2023rl4real}, which we compare
 qualitatively because it targets LLVM's back ends.
 
@@ -1635,86 +2060,164 @@ qualitatively because it targets LLVM's back ends.
 \label{tab:compare}
 \footnotesize
 \setlength{\tabcolsep}{2.5pt}
-\begin{tabular}{@{}p{17mm}p{18mm}p{14mm}p{12mm}p{12mm}@{}}
+\begin{tabular}{@{}>{\raggedright}p{20mm}>{\raggedright}p{22mm}>{\raggedright}p{14mm}>{\raggedright}p{9mm}>{\raggedright\arraybackslash}p{10mm}@{}}
 \toprule
-Approach & Decision basis & Uses measured profile & Training & Explainable \\
+Approach & Decision basis & Measured profile & Training & Explain\-able \\
 \midrule
 Linear scan~\cite{poletto1999} & interval order & no & none & partly \\
 Loop-depth priority~\cite{chow1990} & $10^{d}$ weights & no & none & yes \\
+Chaitin--Briggs~\cite{briggs1994} & frequency-weighted spill cost & yes, as weights & none & partly \\
+LLVM greedy~\cite{olesen2011greedy} & block-frequency spill weight, eviction & yes, as weights & none & partly \\
 RL4ReAl~\cite{venkatakeerthy2023rl4real} & learned policy & indirectly & heavy & no \\
-\MG\ (this work) & expected gain $G(v)$, auction & yes & none & yes (bids) \\
+\MG\ (this work) & expected gain $G(v)$, auction & yes, in the MDP & none & yes (bids) \\
 \bottomrule
 \end{tabular}
 \end{table}
 
+\subsection{Answers to the research questions}
+\label{sec:rq}
+
+\textit{RQ1: Does profiling help?} Yes, moderately and where control
+flow depends on data. With a representative training input, \MG\ is
+1.1--3.1\% faster than the same engine with static priors at $k\le8$
+(geometric mean over 17 programs) and executes 3--51\% fewer spill
+operations; the gain reaches 14\% on scanner and 24\% on Levenshtein.
+With a training input whose branch behaviour differs strongly from the
+test input (above about 30\% error rate where the test has 1\%),
+static priors are better.
+
+\textit{RQ2: Does the MDP and auction formulation help beyond
+profiling?} Yes. With the same profile, \MG\ is 3.3--4.8\% faster than
+profiled-frequency priority, which differs only in replacing the MDP
+gain by frequency-weighted access counts, and 1.2--4.5\% faster than
+Chaitin--Briggs with profiled spill costs, at every $k\le8$ and on both
+suites. The exception is extreme pressure ($k=3$) on three programs,
+where Chaitin--Briggs packs registers better.
+
+\textit{RQ3: How robust are the results?} The ranking is stable across
+five test inputs per program, across the original and the independent
+suites, and across the model constants. The benefit vanishes at
+$k\ge16$, where no allocator except linear scan spills on these
+programs, and it depends on a representative profile, with a
+step-shaped degradation beyond a 20--40\% error rate.
+
+\textit{RQ4: What does it cost?} Allocation takes 1--19\,ms per program
+and grows roughly as $|V|^{1.35}$ with the number of values when live
+ranges are short, but super-linearly, about $(\sum_v|L_v|)^{1.4}$, when live
+ranges span hundreds of blocks. The profiling run costs more than
+the allocation (27 times as much in total here) but is shared by all
+register budgets and is the standard cost of any profile-guided build.
+
 \subsection{Threats to validity}
 
-The benchmarks are small kernels written for this study, and the
-threshold $\theta$ was tuned on the same suite (from the candidates
-0.1, 0.25 and 0.5). Cycles come from a simulator with a fixed latency
-table rather than from hardware, and PG-RISC has no caches, so the
-memory cost is a constant. The MDP charges a value for its whole live
-range, while the optimal policy may move it between register and memory
-inside the range; the code generator does not split live ranges, so
-that part of the policy is computed but not realised.
+\textit{Benchmarks.} The programs are small kernels: ten written for
+this study and seven translated from MiBench and BEEBS. The translation
+replaces bitwise operations with arithmetic, which changes their
+instruction mix, and none of the programs is a large application.
+$\theta$ is now tuned on a separate suite, but the cost constants of
+Table~\ref{tab:params} are shared with the simulator.
+\textit{Simulator.} Cycles come from a simulator with a fixed latency
+table rather than from hardware; PG-RISC has no caches and no branch
+predictor, so a spill always costs the same and a mispredicted branch
+costs nothing extra, both of which favour a model whose costs are
+exact. \textit{Register budgets.} The study covers $k\le32$, but the
+benefit is confined to $k\le8$ on these programs; whether it appears at
+realistic budgets depends on how often real code reaches that
+pressure. \textit{Baselines.} The Chaitin--Briggs and profiled-frequency
+baselines are our re-implementations on PG-RISC; they include
+conservative coalescing, optimistic spilling and biased colouring but
+not live-range splitting or the eviction and region splitting of
+LLVM's greedy allocator, so a production allocator could be stronger.
+\textit{Splitting.} The MDP's optimal policy may move a value between
+register and memory inside its live range; the code generator does not
+split live ranges, so this part of the policy is computed but not
+realised, and the bid now uses the realised policy instead.
 
 %% =====================================================================
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
 
 \MG\ allocates registers adaptively, guided by measured profiles, by
-expected gain: a per-value Markov decision
-process over the live range, solved exactly with measured branch
-probabilities, followed by a sealed-bid auction among $\varphi$-web
-coalitions on the chordal SSA interference graph and best-response
-dynamics to a Nash equilibrium. Existing allocators either rank values
-by static weights that cannot see data-dependent branches or learn
-opaque policies from large corpora.
+expected gain: a per-value Markov decision process over the live range,
+evaluated with measured branch probabilities under the policy the code
+generator realises, followed by a sealed-bid auction among
+$\varphi$-web coalitions on the chordal SSA interference graph and
+best-response dynamics to a Nash equilibrium. Existing allocators rank
+values by static weights that cannot see data-dependent branches, scale
+access counts by profiled frequencies without modelling where spills
+and reloads occur, or learn opaque policies from large corpora.
 
 The method makes the expected saving of each decision an explicit
-number, needs no training, and costs milliseconds. It is embedded in a
-complete compiler, from an LL(1) grammar and attribute-grammar semantic
-analysis through TAC, SSA and optimisation to PG-RISC code and a
-simulator, with a web interface that shows every phase.
+number, needs no training, and costs milliseconds for ordinary
+functions. It is embedded in a complete compiler, from an LL(1) grammar
+and attribute-grammar semantic analysis through TAC, SSA and
+optimisation to PG-RISC code and a simulator, with a web interface that
+shows every phase.
 
-On ten benchmarks and five register budgets, all 200 compiled programs
-match the reference output. At $k=4$, \MG\ reduces geometric-mean
-cycles by 20.5\% relative to linear scan, 6.4\% relative to loop-depth
-priority and 2.5\% relative to static priors, and executes 59\% fewer
-spill memory operations than linear scan, with the largest benefits on
-programs with skewed, data-dependent control flow.
+On 17 programs and seven register budgets, all compiled programs match
+the reference output. At $k=4$, \MG\ reduces geometric-mean cycles by
+21.8\% relative to linear scan, 3.7\% relative to Chaitin--Briggs with
+profile-weighted spill costs, 3.3\% relative to profiled-frequency
+priority and 2.6\% relative to static priors, and it executes half as
+many spill memory operations as linear scan. The ablations show that
+profiling and the MDP gain each contribute, that the benefit is
+concentrated on programs with skewed, data-dependent control flow and
+on budgets of at most eight registers, and that it disappears when the
+training profile misrepresents the test behaviour by a large margin.
+Under extreme pressure ($k=3$), optimistic colouring with coalescing
+still packs some programs better, and long live ranges make the
+per-value linear systems the dominant compile-time cost.
 
-Future work will extend the MDP's policy into live-range splitting in
-the code generator so that values can move between register and memory
-inside a range, replace whole-program averages with context-sensitive
-or phase-aware profiles to address the cases where the profile
-misleads, port the engine to a production back end such as LLVM to
-evaluate it on standard suites and real hardware, and combine measured
-profiles with learned profile prediction~\cite{rotem2021pgo} when no
-representative input is available.
+Future work follows from these limitations: extend the MDP's policy
+into live-range splitting in the code generator so that values can
+move between register and memory inside a range; replace dense
+elimination by banded or incremental solvers for long live ranges;
+combine the gain with optimistic colouring when pressure is extreme;
+replace whole-program averages with context-sensitive or phase-aware
+profiles where the profile misleads; port the engine to a production
+back end such as LLVM to evaluate it on standard suites and real
+hardware; and combine measured profiles with learned profile
+prediction~\cite{rotem2021pgo} when no representative input is
+available.
 
 %% =====================================================================
 \section*{Author Contributions}
 
 \begin{enumerate}
-\item \textbf{Shreyans Chowdry} (24BDS0114): core pipeline design,
-lexical and syntax analysis, AST construction and intermediate code
-generation.
-\item \textbf{Samrender Singh Saini} (24BCE2865): semantic analysis,
-scope resolution and symbol table management.
-\item \textbf{Karthikeya Jami} (24BCE2136): code optimisation engine
-and target assembly and machine code generation.
-\item \textbf{Abhishek Kumar} (24BCE0585): runtime environment, test
-suite and benchmarking.
-\item \textbf{Nishanth Kumar} (24BAI0194): web GUI, pipeline
-visualisation interface and documentation.
+\item \textbf{Shreyans Chowdry}: core pipeline design, lexical and
+syntax analysis, AST construction and intermediate code generation, and
+the web GUI and pipeline visualisation interface, including the
+Allocation view that displays gains, bids, coalitions and auction
+rounds; in the \MG\ allocator, the edge profiler interface, the transition
+matrices (\ref{eq:pprof})--(\ref{eq:pstat}), the block-frequency
+solver (\ref{eq:freq}) and the hot-edge $\varphi$-web coalitions and
+bids (\ref{eq:hot})--(\ref{eq:bid}).
+\item \textbf{Samrender Singh Saini}: semantic analysis, scope
+resolution and symbol table management; in the \MG\ allocator, the
+interference graph, the maximum cardinality search and PEO
+verification, and the sealed-bid auction and register binding
+(Algorithm~\ref{alg:auction}).
+\item \textbf{Karthikeya Jami}: SSA construction, the optimisation
+engine and PG-RISC code generation; in the \MG\ allocator, the residency
+MDP, policy iteration and the gain computation
+(Algorithm~\ref{alg:gains}, (\ref{eq:reward})--(\ref{eq:gain})), and the
+integration of the allocation with code generation.
+\item \textbf{Abhishek Kumar}: runtime environment, simulator, test
+suite and benchmarking; in the \MG\ allocator, best-response dynamics,
+coalition repair (Algorithm~\ref{alg:br}), the baseline allocators and
+ablations used in Section~\ref{sec:impl}, and the experiment scripts.
+\item \textbf{Nishanth Kumar}: assisted with the user documentation and
+with testing the web interface.
 \end{enumerate}
-All authors contributed to the design of the \MG\ allocator and to
-the writing of this manuscript.
+All authors took part in the design discussions of the \MG\ allocator
+and in the writing of this manuscript.
 
 \section*{Acknowledgements}
-The authors thank their course faculty for guidance on recasting the
-allocator around stochastic dynamic programming and game theory.
+The authors thank Bhuvaneswari M, School of Computer Science and
+Engineering, Vellore Institute of Technology, for guidance on
+recasting the allocator around stochastic dynamic programming and game
+theory, and the reviewer of the first draft for comments that led to
+the additional baselines and experiments in this version.
 
 \section*{Funding}
 This work received no external funding.
@@ -1723,9 +2226,16 @@ This work received no external funding.
 The authors declare no competing interests.
 
 \section*{Data and Code Availability}
-The compiler, the web interface, the benchmark programs and the raw
-results (JSON and CSV for all 200 configurations and the sensitivity
-study) are available from the authors on request.
+The compiler, the web interface, the three benchmark suites, the unit
+tests, the experiment scripts and the raw results (JSON for all 1{,}428
+configurations and every study in Section~\ref{sec:impl}) are publicly
+available at \url{https://github.com/shreyans-chowdry/pgara}. The
+results in this paper were produced from commit
+\texttt{9b154888a712\allowbreak f99e2170fe\allowbreak a9a797388995\allowbreak d731f5}
+(branch \texttt{draft2-revision}) with \texttt{python3 -m pgara.experiments};
+the full-window screenshots of every view of the Compiler Studio are in
+\texttt{docs/screenshots}, and a live instance of the interface is
+hosted at \url{https://pgara.vercel.app}.
 
 %% =====================================================================
 \begin{thebibliography}{99}
@@ -1780,6 +2290,16 @@ pp.~98--105.
 F.~C. Chow and J.~L. Hennessy, ``The priority-based coloring approach
 to register allocation,'' \emph{ACM Trans.\ Program.\ Lang.\ Syst.},
 vol.~12, no.~4, pp.~501--536, 1990.
+
+\bibitem{olesen2011greedy}
+J.~Olesen, ``Greedy register allocation in LLVM 3.0,'' LLVM Project
+Blog, Sep.~2011. [Online]. Available:
+\url{https://blog.llvm.org/2011/09/greedy-register-allocation-in-llvm-30.html}
+
+\bibitem{llvmbfi}
+LLVM Project, ``LLVM block frequency terminology,'' LLVM documentation.
+[Online]. Available:
+\url{https://llvm.org/docs/BlockFrequencyTerminology.html}
 
 \bibitem{poletto1999}
 M.~Poletto and V.~Sarkar, ``Linear scan register allocation,''
@@ -1864,6 +2384,21 @@ Y.~Wu and J.~R. Larus, ``Static branch frequency and program profile
 analysis,'' in \emph{Proc.\ 27th Annu.\ Int.\ Symp.\ Microarchitecture
 (MICRO)}, 1994, pp.~1--11.
 
+\bibitem{wall1991}
+D.~W. Wall, ``Predicting program behavior using real or estimated
+profiles,'' in \emph{Proc.\ ACM SIGPLAN Conf.\ Programming Language
+Design and Implementation (PLDI)}, 1991, pp.~59--70.
+
+\bibitem{callahan1991}
+D.~Callahan and B.~Koblenz, ``Register allocation via hierarchical
+graph coloring,'' in \emph{Proc.\ ACM SIGPLAN Conf.\ Programming Language
+Design and Implementation (PLDI)}, 1991, pp.~192--203.
+
+\bibitem{koes2006}
+D.~R. Koes and S.~C. Goldstein, ``A global progressive register
+allocator,'' in \emph{Proc.\ ACM SIGPLAN Conf.\ Programming Language
+Design and Implementation (PLDI)}, 2006, pp.~204--215.
+
 \bibitem{sutton2018rl}
 R.~S. Sutton and A.~G. Barto, \emph{Reinforcement Learning: An
 Introduction}, 2nd~ed. Cambridge, MA, USA: MIT Press, 2018.
@@ -1879,10 +2414,6 @@ Belmont, MA, USA: Athena Scientific, 2019.
 \bibitem{howard1960}
 R.~A. Howard, \emph{Dynamic Programming and Markov Processes}.
 Cambridge, MA, USA: MIT Press, 1960.
-
-\bibitem{bellman1957}
-R.~Bellman, \emph{Dynamic Programming}. Princeton, NJ, USA: Princeton
-Univ.\ Press, 1957.
 
 \bibitem{shapley1953}
 L.~S. Shapley, ``A value for $n$-person games,'' in \emph{Contributions
@@ -1921,11 +2452,25 @@ I.~Stoica, ``NeuroVectorizer: End-to-end vectorization with deep
 reinforcement learning,'' in \emph{Proc.\ IEEE/ACM Int.\ Symp.\ Code
 Generation and Optimization (CGO)}, 2020, pp.~242--255.
 
-\bibitem{cummins2023llm}
-C.~Cummins, V.~Seeker, D.~Grubisic, M.~Elhoushi, Y.~Liang,
-B.~Rozi{\`e}re, J.~Gehring, F.~Gloeckle, K.~Hazelwood, G.~Synnaeve, and
-H.~Leather, ``Large language models for compiler optimization,''
-arXiv:2309.07062, 2023.
+\bibitem{cummins2025llmcompiler}
+C.~Cummins, V.~Seeker, D.~Grubisic, B.~Rozi{\`e}re, J.~Gehring,
+G.~Synnaeve, and H.~Leather, ``LLM Compiler: Foundation language models
+for compiler optimization,'' in \emph{Proc.\ 34th ACM SIGPLAN Int.\
+Conf.\ Compiler Construction (CC)}, 2025.
+
+\bibitem{briggs1994}
+P.~Briggs, K.~D. Cooper, and L.~Torczon, ``Improvements to graph
+coloring register allocation,'' \emph{ACM Trans.\ Program.\ Lang.\
+Syst.}, vol.~16, no.~3, pp.~428--455, 1994.
+
+\bibitem{george1996}
+L.~George and A.~W. Appel, ``Iterated register coalescing,'' \emph{ACM
+Trans.\ Program.\ Lang.\ Syst.}, vol.~18, no.~3, pp.~300--324, 1996.
+
+\bibitem{lueh2000}
+G.-Y. Lueh, T.~Gross, and A.-R. Adl-Tabatabai, ``Fusion-based register
+allocation,'' \emph{ACM Trans.\ Program.\ Lang.\ Syst.}, vol.~22,
+no.~3, pp.~431--470, 2000.
 
 \bibitem{knuth1965lr}
 D.~E. Knuth, ``On the translation of languages from left to right,''
@@ -1948,15 +2493,89 @@ M.~N. Wegman and F.~K. Zadeck, ``Constant propagation with conditional
 branches,'' \emph{ACM Trans.\ Program.\ Lang.\ Syst.}, vol.~13, no.~2,
 pp.~181--210, 1991.
 
+\bibitem{bellman1957}
+R.~Bellman, \emph{Dynamic Programming}. Princeton, NJ, USA: Princeton
+Univ.\ Press, 1957.
+
+\bibitem{panagopoulou2008}
+P.~N. Panagopoulou and P.~G. Spirakis, ``A game theoretic approach for
+efficient graph coloring,'' in \emph{Proc.\ Int.\ Symp.\ Algorithms and
+Computation (ISAAC)}, LNCS 5369, 2008, pp.~183--195.
+
+\bibitem{monderer1996}
+D.~Monderer and L.~S. Shapley, ``Potential games,'' \emph{Games Econ.\
+Behav.}, vol.~14, no.~1, pp.~124--143, 1996.
+
 \bibitem{python}
 Python Software Foundation, ``Python 3 documentation,'' 2024.
 [Online]. Available: \url{https://docs.python.org/3/}
+
+\bibitem{coveragepy}
+N.~Batchelder \emph{et~al.}, ``Coverage.py: Code coverage measurement
+for Python.'' [Online]. Available: \url{https://coverage.readthedocs.io/}
 
 \bibitem{playwright}
 Microsoft, ``Playwright: Fast and reliable end-to-end testing for
 modern web apps,'' 2024. [Online]. Available:
 \url{https://playwright.dev/}
 
+\bibitem{guthaus2001mibench}
+M.~R. Guthaus, J.~S. Ringenberg, D.~Ernst, T.~M. Austin, T.~Mudge, and
+R.~B. Brown, ``MiBench: A free, commercially representative embedded
+benchmark suite,'' in \emph{Proc.\ IEEE Int.\ Workshop Workload
+Characterization (WWC-4)}, 2001, pp.~3--14.
+
+\bibitem{pallister2013beebs}
+J.~Pallister, S.~Hollis, and J.~Bennett, ``BEEBS: Open benchmarks for
+energy measurements on embedded platforms,'' arXiv:1308.5174, 2013.
+
 \end{thebibliography}
+
+\clearpage
+\newcommand{\photoplaceholder}{\fbox{\parbox[c][1.17in][c]{0.93in}{\centering\scriptsize Photograph\\to be added}}}
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{photos/shreyans.jpg}}]{Shreyans Chowdry}
+is pursuing the B.Tech.\ degree in Computer Science and Engineering
+with a specialisation in Data Science at the Vellore Institute of
+Technology, Vellore, India. His interests include compilers, applied
+artificial intelligence and full-stack software engineering. In this
+work he designed the core compiler pipeline (lexer, LL(1) grammar and
+parser, AST and three-address code), built the web interface, and
+developed the profile-derived transition model and the $\varphi$-web
+coalitions of the \MG\ allocator.
+\end{IEEEbiography}
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{photos/samrender.jpg}}]{Samrender Singh Saini}
+is pursuing the B.Tech.\ degree in Computer Science and Engineering at
+the Vellore Institute of Technology, Vellore, India. In this work he
+developed the semantic analysis, scope resolution and symbol table
+management of the compiler, and the interference graph, maximum
+cardinality search and sealed-bid auction of the \MG\ allocator.
+\end{IEEEbiography}
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{photos/karthikeya.jpg}}]{Karthikeya Jami}
+is pursuing the B.Tech.\ degree in Computer Science and Engineering at
+the Vellore Institute of Technology, Vellore, India. In this work he
+developed SSA construction, the optimiser and PG-RISC code generation,
+and the residency MDP, policy iteration and gain computation of the
+\MG\ allocator.
+\end{IEEEbiography}
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{photos/abhishek.jpg}}]{Abhishek Kumar}
+is pursuing the B.Tech.\ degree in Computer Science and Engineering at
+the Vellore Institute of Technology, Vellore, India. In this work he
+developed the reference interpreter, the cycle-counting simulator, the
+test suite and the benchmark harness, and the best-response dynamics,
+coalition repair and baseline allocators of the \MG\ allocator.
+\end{IEEEbiography}
+
+\begin{IEEEbiography}[{\photoplaceholder}]{Nishanth Kumar}
+is pursuing the B.Tech.\ degree in Computer Science and Engineering
+(Artificial Intelligence and Machine Learning) at the Vellore Institute
+of Technology, Vellore, India. In this work he assisted with the
+documentation and with testing the web interface.
+\end{IEEEbiography}
+
+\EOD
 
 \end{document}

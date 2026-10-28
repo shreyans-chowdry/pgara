@@ -1,0 +1,701 @@
+[
+ {
+  "suite": "original",
+  "program": "benchmarks/01_straightline.mc",
+  "title": "Straight-line arithmetic",
+  "train_input": [
+   12,
+   7
+  ],
+  "test_inputs": [
+   [
+    5,
+    9
+   ],
+   [
+    3,
+    4
+   ],
+   [
+    20,
+    11
+   ],
+   [
+    8,
+    2
+   ],
+   [
+    15,
+    6
+   ]
+  ],
+  "reference_output_primary_test": [
+   24,
+   40,
+   967,
+   -224,
+   1239,
+   6802,
+   8862,
+   1407,
+   1680302397
+  ]
+ },
+ {
+  "suite": "original",
+  "program": "benchmarks/02_arraysum.mc",
+  "title": "Array-sum loop",
+  "train_input": [
+   7
+  ],
+  "test_inputs": [
+   [
+    13
+   ],
+   [
+    17
+   ],
+   [
+    19
+   ],
+   [
+    29
+   ],
+   [
+    31
+   ]
+  ],
+  "reference_output_primary_test": [
+   1912800,
+   1969232,
+   0,
+   998,
+   2064
+  ]
+ },
+ {
+  "suite": "original",
+  "program": "benchmarks/03_matmul.mc",
+  "title": "Nested loops (matmul)",
+  "train_input": [
+   3
+  ],
+  "test_inputs": [
+   [
+    5
+   ],
+   [
+    7
+   ],
+   [
+    9
+   ],
+   [
+    11
+   ],
+   [
+    13
+   ]
+  ],
+  "reference_output_primary_test": [
+   5,
+   455
+  ]
+ },
+ {
+  "suite": "original",
+  "program": "benchmarks/04_recursion.mc",
+  "title": "Recursion (fib/gcd/pow)",
+  "train_input": [
+   16
+  ],
+  "test_inputs": [
+   [
+    17
+   ],
+   [
+    15
+   ],
+   [
+    18
+   ],
+   [
+    14
+   ],
+   [
+    19
+   ]
+  ],
+  "reference_output_primary_test": [
+   1597,
+   823,
+   5352
+  ]
+ },
+ {
+  "suite": "original",
+  "program": "benchmarks/05_rarebranch.mc",
+  "title": "Rare error branch",
+  "train_input": [
+   7,
+   10
+  ],
+  "test_inputs": [
+   [
+    13,
+    10
+   ],
+   [
+    17,
+    10
+   ],
+   [
+    19,
+    10
+   ],
+   [
+    29,
+    10
+   ],
+   [
+    31,
+    10
+   ]
+  ],
+  "reference_output_primary_test": [
+   802752,
+   1187980,
+   4052,
+   199,
+   44,
+   -220,
+   1016,
+   975
+  ]
+ },
+ {
+  "suite": "original",
+  "program": "benchmarks/06_earlyexit.mc",
+  "title": "Early-exit search",
+  "train_input": [
+   7
+  ],
+  "test_inputs": [
+   [
+    13
+   ],
+   [
+    17
+   ],
+   [
+    19
+   ],
+   [
+    29
+   ],
+   [
+    31
+   ]
+  ],
+  "reference_output_primary_test": [
+   120,
+   0,
+   11939,
+   58,
+   0
+  ]
+ },
+ {
+  "suite": "original",
+  "program": "benchmarks/07_dispatch.mc",
+  "title": "Switch-heavy dispatch",
+  "train_input": [
+   7,
+   70
+  ],
+  "test_inputs": [
+   [
+    13,
+    70
+   ],
+   [
+    17,
+    70
+   ],
+   [
+    19,
+    70
+   ],
+   [
+    29,
+    70
+   ],
+   [
+    31,
+    70
+   ]
+  ],
+  "reference_output_primary_test": [
+   24109,
+   61,
+   1752,
+   330,
+   90,
+   48,
+   66,
+   114
+  ]
+ },
+ {
+  "suite": "original",
+  "program": "benchmarks/08_scanner.mc",
+  "title": "Token scanner",
+  "train_input": [
+   7,
+   10
+  ],
+  "test_inputs": [
+   [
+    13,
+    10
+   ],
+   [
+    17,
+    10
+   ],
+   [
+    19,
+    10
+   ],
+   [
+    29,
+    10
+   ],
+   [
+    31,
+    10
+   ]
+  ],
+  "reference_output_primary_test": [
+   180,
+   361,
+   87,
+   89,
+   24,
+   1382
+  ]
+ },
+ {
+  "suite": "original",
+  "program": "benchmarks/09_sort.mc",
+  "title": "Insertion sort + bsearch",
+  "train_input": [
+   7
+  ],
+  "test_inputs": [
+   [
+    13
+   ],
+   [
+    17
+   ],
+   [
+    19
+   ],
+   [
+    29
+   ],
+   [
+    31
+   ]
+  ],
+  "reference_output_primary_test": [
+   23433,
+   13,
+   3286,
+   12,
+   9983
+  ]
+ },
+ {
+  "suite": "original",
+  "program": "benchmarks/10_collatz.mc",
+  "title": "Collatz + sieve",
+  "train_input": [
+   300
+  ],
+  "test_inputs": [
+   [
+    340
+   ],
+   [
+    320
+   ],
+   [
+    360
+   ],
+   [
+    310
+   ],
+   [
+    350
+   ]
+  ],
+  "reference_output_primary_test": [
+   143,
+   327,
+   16350,
+   13120,
+   430
+  ]
+ },
+ {
+  "suite": "independent",
+  "program": "benchmarks/extra/e1_crc.mc",
+  "title": "CRC-32 (MiBench)",
+  "train_input": [
+   3,
+   120
+  ],
+  "test_inputs": [
+   [
+    5,
+    120
+   ],
+   [
+    9,
+    120
+   ],
+   [
+    11,
+    120
+   ],
+   [
+    17,
+    120
+   ],
+   [
+    23,
+    120
+   ]
+  ],
+  "reference_output_primary_test": [
+   9666,
+   2899
+  ]
+ },
+ {
+  "suite": "independent",
+  "program": "benchmarks/extra/e2_bitcount.mc",
+  "title": "Bit counting (MiBench)",
+  "train_input": [
+   3,
+   400
+  ],
+  "test_inputs": [
+   [
+    5,
+    400
+   ],
+   [
+    9,
+    400
+   ],
+   [
+    11,
+    400
+   ],
+   [
+    17,
+    400
+   ],
+   [
+    23,
+    400
+   ]
+  ],
+  "reference_output_primary_test": [
+   3274,
+   3274,
+   3274,
+   3
+  ]
+ },
+ {
+  "suite": "independent",
+  "program": "benchmarks/extra/e3_dijkstra.mc",
+  "title": "Dijkstra (MiBench)",
+  "train_input": [
+   3,
+   30
+  ],
+  "test_inputs": [
+   [
+    5,
+    30
+   ],
+   [
+    9,
+    30
+   ],
+   [
+    11,
+    30
+   ],
+   [
+    17,
+    30
+   ],
+   [
+    23,
+    30
+   ]
+  ],
+  "reference_output_primary_test": [
+   4857,
+   1275
+  ]
+ },
+ {
+  "suite": "independent",
+  "program": "benchmarks/extra/e4_levenshtein.mc",
+  "title": "Levenshtein (BEEBS)",
+  "train_input": [
+   3,
+   4
+  ],
+  "test_inputs": [
+   [
+    5,
+    4
+   ],
+   [
+    9,
+    4
+   ],
+   [
+    11,
+    4
+   ],
+   [
+    17,
+    4
+   ],
+   [
+    23,
+    4
+   ]
+  ],
+  "reference_output_primary_test": [
+   366,
+   8346
+  ]
+ },
+ {
+  "suite": "independent",
+  "program": "benchmarks/extra/e5_knapsack.mc",
+  "title": "0/1 knapsack (DP)",
+  "train_input": [
+   3,
+   20
+  ],
+  "test_inputs": [
+   [
+    5,
+    20
+   ],
+   [
+    9,
+    20
+   ],
+   [
+    11,
+    20
+   ],
+   [
+    17,
+    20
+   ],
+   [
+    23,
+    20
+   ]
+  ],
+  "reference_output_primary_test": [
+   1767,
+   13029
+  ]
+ },
+ {
+  "suite": "independent",
+  "program": "benchmarks/extra/e6_fir.mc",
+  "title": "FIR filter (BEEBS)",
+  "train_input": [
+   3,
+   10
+  ],
+  "test_inputs": [
+   [
+    5,
+    10
+   ],
+   [
+    9,
+    10
+   ],
+   [
+    11,
+    10
+   ],
+   [
+    17,
+    10
+   ],
+   [
+    23,
+    10
+   ]
+  ],
+  "reference_output_primary_test": [
+   3014094,
+   0,
+   0,
+   1916
+  ]
+ },
+ {
+  "suite": "independent",
+  "program": "benchmarks/extra/e7_qsort.mc",
+  "title": "Quicksort (MiBench)",
+  "train_input": [
+   3,
+   500
+  ],
+  "test_inputs": [
+   [
+    5,
+    500
+   ],
+   [
+    9,
+    500
+   ],
+   [
+    11,
+    500
+   ],
+   [
+    17,
+    500
+   ],
+   [
+    23,
+    500
+   ]
+  ],
+  "reference_output_primary_test": [
+   1,
+   1692,
+   0,
+   256,
+   499
+  ]
+ },
+ {
+  "suite": "tuning",
+  "program": "benchmarks/tuning/t1_bubble.mc",
+  "title": "bubble",
+  "train_input": [
+   3
+  ],
+  "test_inputs": [
+   [
+    7
+   ]
+  ],
+  "reference_output_primary_test": [
+   140,
+   5408,
+   2,
+   997
+  ]
+ },
+ {
+  "suite": "tuning",
+  "program": "benchmarks/tuning/t2_primes.mc",
+  "title": "primes",
+  "train_input": [
+   6000
+  ],
+  "test_inputs": [
+   [
+    7000
+   ]
+  ],
+  "reference_output_primary_test": [
+   899,
+   162,
+   34
+  ]
+ },
+ {
+  "suite": "tuning",
+  "program": "benchmarks/tuning/t3_histogram.mc",
+  "title": "histogram",
+  "train_input": [
+   3,
+   20
+  ],
+  "test_inputs": [
+   [
+    7,
+    20
+   ]
+  ],
+  "reference_output_primary_test": [
+   55,
+   64,
+   936126,
+   76551,
+   1
+  ]
+ },
+ {
+  "suite": "tuning",
+  "program": "benchmarks/tuning/t4_strmatch.mc",
+  "title": "strmatch",
+  "train_input": [
+   3,
+   4
+  ],
+  "test_inputs": [
+   [
+    7,
+    4
+   ]
+  ],
+  "reference_output_primary_test": [
+   81,
+   15745
+  ]
+ },
+ {
+  "suite": "tuning",
+  "program": "benchmarks/tuning/t5_gcdtable.mc",
+  "title": "gcdtable",
+  "train_input": [
+   40
+  ],
+  "test_inputs": [
+   [
+    44
+   ]
+  ],
+  "reference_output_primary_test": [
+   5040,
+   1207,
+   230,
+   642402
+  ]
+ }
+]

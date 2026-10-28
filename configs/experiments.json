@@ -1,0 +1,13 @@
+{
+  "_comment": "Settings used for every result in the manuscript (Draft 2). Pass with: python3 -m pgara.experiments --config configs/experiments.json",
+  "k_values": [3, 4, 5, 6, 8, 16, 32],
+  "theta": 0.75,
+  "gain_policy": "forced",
+  "cost_model": {
+    "load": 4,
+    "store": 2,
+    "register_access_bonus": 1,
+    "forwarded_move": 1,
+    "static_loop_stay": 0.9
+  }
+}

@@ -1,25 +1,117 @@
-# PGARA Compiler Studio
+# PGARA: Profile-Guided Adaptive Register Allocation
 
-**PGARA (Profile-Guided Adaptive Register Allocation)** is a complete compiler for **MiniC**, a small C subset. Its register allocator learns from a profiling run which paths of the program are hot, then gives registers to the values that save the most cycles. It does this with stochastic dynamic programming and a game-theoretic auction instead of graph colouring. A web interface shows every phase of compilation as it happens.
+**Team 14 · Compiler Design (L43+L44) · Vellore Institute of Technology** · Release **v1.0.0**
 
-You need only **Python 3.8 or newer**. There are no packages to install and no build step.
+**PGARA** is a complete compiler for **MiniC**, a small C subset, built around a new register allocator. A profiling run measures how often each branch is taken. Every SSA value is then modelled as a two-state Markov decision process (register or memory) to compute the cycles a register would save, and registers are sold in a sealed-bid auction on the chordal interference graph, settled by best-response dynamics into a Nash equilibrium. No graph colouring is used. A web interface, **PGARA Compiler Studio**, shows every phase of compilation as you type.
+
+- **Manuscript (final, Draft 2):** [`manuscript/PGARA-FINAL.pdf`](manuscript/PGARA-FINAL.pdf)
+- **LaTeX sources (Overleaf-ready zip):** [`manuscript/PGARA-Manuscript-LaTeX.zip`](manuscript/PGARA-Manuscript-LaTeX.zip)
+- **Demo video:** [`docs/demo/`](docs/demo/) (4–7 minutes); script in [`docs/Demo-Video-Script.md`](docs/Demo-Video-Script.md)
+- **Live interface:** https://pgara.vercel.app
 
 ---
 
-## Start it
+## Repository contents
 
-| System | What to do |
+| # | Required item | Where |
+|---|---|---|
+| 1 | Manuscript LaTeX (zip, all images and class files, compiles on Overleaf) | `manuscript/PGARA-Manuscript-LaTeX.zip` (unzipped copy in `manuscript/latex/`) |
+| 2 | Source code | `pgara/` (compiler and allocators), `web/` (GUI), `server.py`, `api/` (Vercel entry point) |
+| 3 | README | this file |
+| 4 | Dependencies | `requirements.txt` (standard library only), `requirements-dev.txt` (optional tools) |
+| 5 | Datasets and preprocessing | `benchmarks/` (22 MiniC programs), `datasets/benchmark_inputs.json`, `scripts/prepare_datasets.py` |
+| 6 | Trained models | none: PGARA learns nothing offline; its only "model" is the per-program profile, computed at compile time |
+| 7 | Configuration files | `configs/experiments.json`, `configs/server.example.env`, `vercel.json` |
+| 8 | Execution scripts | `scripts/` (setup, tests, GUI, experiments, benchmark, single compile; `.sh` and `.bat`) |
+| 9 | Results, metrics, sample outputs | `results/` (see `results/README.md`) |
+| 10 | Documentation | `manuscript/PGARA-FINAL.pdf`, `guide/PGARA-Project-Guide.pdf`, `docs/screenshots/` |
+| 11 | Demo video | `docs/demo/` |
+
+```
+pgara/            compiler: lexer, parser, semantic, irgen, cfg, ssa, optimize, interp,
+                  regalloc (PGARA + 6 baselines), codegen, simulator, pipeline, bench, experiments
+tests/            27 unit and end-to-end tests
+benchmarks/       original suite (10) · extra/ independent suite (7, MiBench/BEEBS) · tuning/ (5)
+datasets/         inputs and reference outputs of every program (generated, verified)
+configs/          experiment settings and GUI settings template
+scripts/          setup and execution scripts
+results/          experimental results (JSON), summary tables, sample outputs
+manuscript/       final PDF and LaTeX sources
+docs/             demo video and script, full GUI screenshots
+web/, server.py   PGARA Compiler Studio (web GUI)
+```
+
+---
+
+## System requirements
+
+- **Python 3.8 or newer** (tested with 3.12 and 3.13) on macOS, Linux or Windows.
+- **No third-party packages.** Everything uses the Python standard library.
+- A modern web browser for the GUI.
+- About 50 MB of disk space; a full reproduction of the experiments takes 15–25 minutes on a laptop.
+- Optional: `coverage` and `playwright` (`requirements-dev.txt`) only to measure coverage or regenerate screenshots.
+
+## Installation
+
+```sh
+git clone https://github.com/shreyans-chowdry/pgara.git
+cd pgara
+python3 -m pip install -r requirements.txt   # installs nothing: no runtime dependencies
+scripts/setup.sh                             # checks Python and verifies all benchmark programs
+```
+
+On Windows use `python` instead of `python3`, and run the `.bat` scripts.
+
+## Configuration
+
+- `configs/experiments.json` holds every setting used for the manuscript: register budgets k = 3–32, hot-edge threshold θ = 0.75, gain policy and cost-model constants (load 4, store 2, σ = 1, c_mv = 1). Pass it with `--config`; `scripts/run_experiments.sh` does this for you.
+- `configs/server.example.env`: copy it to `configs/server.env` to change the GUI port or stop the browser from opening.
+- No passwords, API keys or network services are needed.
+
+## Execution
+
+| Task | Command | Time |
+|---|---|---|
+| Start the web GUI | `scripts/run_gui.sh` (or `start.sh`, `start.command`, `start.bat`, `python3 server.py`) → http://127.0.0.1:8765/ | instant |
+| Run all tests | `scripts/run_tests.sh` (Windows: `scripts\run_tests.bat`) | 1–3 min |
+| Reproduce every result of the paper | `scripts/run_experiments.sh` (Windows: `scripts\run_experiments.bat`) | 15–25 min |
+| Run selected studies | `scripts/run_experiments.sh main inputs` | |
+| Quick four-allocator study | `scripts/run_benchmark.sh` | 10 s |
+| Compile one program | `scripts/compile_example.sh benchmarks/05_rarebranch.mc 4 "7 10" "13 10"` | 1 s |
+| Rebuild sample outputs | `python3 scripts/sample_outputs.py` | 1 s |
+| Summarise results | `python3 scripts/summarise_results.py` | 1 s |
+
+There is no training step: PGARA's only learned quantity is the per-program profile, which is measured during compilation.
+
+The studies of `python3 -m pgara.experiments` are:
+
+| Study | What it does |
 |---|---|
-| **macOS** | Double-click **`start.command`**. If macOS says it is from an unidentified developer, right-click it, choose **Open**, then **Open** again. You only need to do this the first time. |
-| **macOS / Linux terminal** | `./start.sh` |
-| **Windows** | Double-click **`start.bat`** |
-| **Any system** | `python3 server.py` |
+| `tuning` | chooses θ on the held-out suite `benchmarks/tuning` (never used in reported results) |
+| `main` | 17 programs, seven allocators, k = 3, 4, 5, 6, 8, 16, 32 |
+| `inputs` | five test inputs per program at k = 4 |
+| `errsweep` | rare-branch, training error rate 1%–60% |
+| `costs` | sensitivity to the model constants σ and c_mv |
+| `policy` | realised (always-in-register) gain vs optimal-policy gain |
+| `scaling` | allocation time on generated programs of growing size |
 
-Your browser opens **http://127.0.0.1:8765/** automatically. If port 8765 is taken, the next free port is used and printed in the terminal. Press **Ctrl+C** in that terminal window to stop the server.
+The allocators are PGARA, Static-Prior PGARA, profiled-frequency priority (ablation), loop-depth priority, Chaitin–Briggs with static and with profile-weighted spill costs, and linear scan.
 
-Optional flags: `--port 9000` picks another port, and `--no-browser` stops the browser from opening.
+### Verified in a fresh environment
 
-If macOS reports that `python3` is missing, run `xcode-select --install` once, or install Python from python.org.
+A fresh clone was set up in a clean Python 3 environment with no extra packages. `scripts/setup.sh`, `scripts/run_tests.sh` (27 tests, OK) and `scripts/run_experiments.sh main` all ran successfully, and `results/v2/main.json` was reproduced exactly.
+
+---
+
+## Key results
+
+At k = 4, over 17 programs (geometric mean), PGARA needs:
+- **21.8%** fewer cycles than linear scan,
+- **3.7%** fewer than Chaitin–Briggs with profiled spill costs,
+- **3.3%** fewer than profiled-frequency priority,
+- **2.6%** fewer than Static-Prior.
+
+It also executes **50%** fewer spill memory operations than linear scan. All 1,428 compiled configurations match the reference output. See [`results/README.md`](results/README.md).
 
 ---
 
@@ -65,7 +157,7 @@ Errors appear under the editor and in red in the gutter. Click an error to jump 
 9. **Code generation**: out-of-SSA translation with parallel copies, spill slots shared per φ-web, caller-save around calls, and a peephole pass.
 10. **Simulator**: a cycle-counting PG-RISC machine. Each run is checked against the reference interpreter's output.
 
-The compiler also includes three baseline allocators for comparison: **Static-Prior PGARA** (no profile), **loop-depth priority** (Chow–Hennessy style) and **linear scan** (Poletto–Sarkar).
+The GUI compares four allocators: **PGARA**, **Static-Prior PGARA** (no profile), **loop-depth priority** (Chow–Hennessy style) and **linear scan** (Poletto–Sarkar). The experiment harness adds **profiled-frequency priority** and **Chaitin–Briggs** with static and with profile-weighted spill costs.
 
 ---
 
@@ -96,34 +188,6 @@ int main() {
 
 ---
 
-## Command line
-
-```sh
-python3 -m pgara.bench                 # full benchmark study; writes results/results.json and results.csv
-python3 -m pgara.bench --k 4           # a single register budget
-python3 -m unittest -v tests.test_compiler   # 27 tests, about 1-3 minutes
-python3 -m pgara.experiments           # extended evaluation (Draft 2 of the paper); writes results/v2/*.json
-python3 -m pgara.experiments main inputs --theta 0.75   # run selected studies only
-```
-
-### Extended evaluation (Draft 2)
-
-`pgara/experiments.py` runs the studies reported in the revised manuscript:
-
-| Study | What it does |
-|---|---|
-| `tuning` | chooses the hot-edge threshold θ on the held-out suite in `benchmarks/tuning` (never used in reported results) |
-| `main` | original suite + independent suite (`benchmarks/extra`, translated from MiBench and BEEBS), seven allocators, k = 3, 4, 5, 6, 8, 16, 32 |
-| `inputs` | five test inputs per program at k = 4 |
-| `errsweep` | rare-branch with a training error rate from 1% to 60% |
-| `costs` | sensitivity to the model constants σ and c_mv |
-| `policy` | realised (always-in-register) gain vs the optimal-policy gain |
-| `scaling` | allocation time on generated programs of growing size |
-
-Besides the four allocators of the GUI, the harness compares a profiled-frequency priority allocator (an ablation of the MDP gain) and Chaitin–Briggs colouring with static and with profile-weighted spill costs (`regalloc.EXTRA_ALLOCATORS`). Full-window screenshots of every GUI view are in `docs/screenshots`.
-
----
-
 ## Team
 
 | Member | Registration No. | Role |
@@ -134,4 +198,4 @@ Besides the four allocators of the GUI, the harness compares a profiled-frequenc
 | Abhishek Kumar | 24BCE0585 | Runtime environment, simulator, test suite and benchmarking; in the allocator: best response, coalition repair, baselines and ablations |
 | Nishanth Kumar | 24BAI0194 | Documentation and interface testing support |
 
-The `paper` folder holds the IEEE manuscript (`pgara.tex`, its compiled PDF and the files needed to rebuild it with `pdflatex pgara.tex`, run twice). The `guide` folder holds **PGARA-Project-Guide.pdf**, a plain-language explanation of the whole project, the research behind it, the code and the website.
+The `guide` folder holds **PGARA-Project-Guide.pdf**, a plain-language explanation of the project written for Draft 1; numbers in it predate the revised evaluation, which is in the manuscript.
