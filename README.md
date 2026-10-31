@@ -6,7 +6,7 @@
 
 - **Manuscript (final, Draft 2):** [`manuscript/PGARA-FINAL.pdf`](manuscript/PGARA-FINAL.pdf)
 - **LaTeX sources (Overleaf-ready zip):** [`manuscript/PGARA-Manuscript-LaTeX.zip`](manuscript/PGARA-Manuscript-LaTeX.zip)
-- **Demo video:** [`docs/demo/`](docs/demo/) (4–7 minutes); script in [`docs/Demo-Video-Script.md`](docs/Demo-Video-Script.md)
+- **Demo video:** [`docs/demo/`](docs/demo/) (4–7 minutes); script in [`docs/PGARA-Demo-Video-Script.pdf`](docs/PGARA-Demo-Video-Script.pdf)
 - **Live interface:** https://pgara.vercel.app
 
 ---
